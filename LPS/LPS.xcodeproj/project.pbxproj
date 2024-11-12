@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		35E2DAD12CE3D3A1008A5986 /* PokemonAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 35E2DAD02CE3D3A1008A5986 /* PokemonAPI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		35E2DAA52CE3B5E5008A5986 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				35E2DAD12CE3D3A1008A5986 /* PokemonAPI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = LPS;
 			packageProductDependencies = (
+				35E2DAD02CE3D3A1008A5986 /* PokemonAPI */,
 			);
 			productName = LPS;
 			productReference = 35E2DA942CE3B5E3008A5986 /* LPS.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 35E2DA8B2CE3B5E3008A5986;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				35E2DACF2CE3D3A1008A5986 /* XCRemoteSwiftPackageReference "PokemonAPI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 35E2DA952CE3B5E3008A5986 /* Products */;
 			projectDirPath = "";
@@ -552,6 +561,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		35E2DACF2CE3D3A1008A5986 /* XCRemoteSwiftPackageReference "PokemonAPI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kinkofer/PokemonAPI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		35E2DAD02CE3D3A1008A5986 /* PokemonAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 35E2DACF2CE3D3A1008A5986 /* XCRemoteSwiftPackageReference "PokemonAPI" */;
+			productName = PokemonAPI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 35E2DA8C2CE3B5E3008A5986 /* Project object */;
 }
