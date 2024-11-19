@@ -35,8 +35,73 @@ struct BusquedaView: View {
     }
 }
 
+struct FilterView: View {
+    // Texto boton
+    var text: String
+    
+    // Width
+    var width: CGFloat
+    
+    // Estado para controlar si el listado de filtros está abierto
+    @State private var isOpen: Bool = false
+    
+    // Estado para manejar el filtro seleccionado
+    @State private var selectedFilter: String = ""
+    
+    // Opciones de filtro disponibles
+    let options = ["1", "2", "3", "4"]
+    
+    var body: some View {
+        VStack {
+            // Botón para mostrar las opciones de filtro
+            Button(action: {
+                // Alterna el estado de visibilidad de las opciones
+                isOpen.toggle()
+            }) {
+                Text(text)
+                    .padding()
+                    .frame(width: width, height: 32)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+                    .foregroundColor(.black)
+            }
+            
+            // Mostrar las opciones solo si isOpen es verdadero
+            if isOpen {
+                VStack {
+                    ForEach(options, id: \.self) { option in
+                        Button(action: {
+                            // Seleccionar filtro y cerrar las opciones
+                            selectedFilter = option
+                            isOpen = false
+                        }) {
+                            Text(option)
+                                .padding()
+                                .frame(width: width, height: 32)
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .foregroundColor(.black)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1)
+                                )
+                        }
+                        .padding(.top, 4)
+                    }
+                }
+                .transition(.move(edge: .top)) // Transición de deslizamiento
+                .animation(.easeInOut, value: isOpen) // Animación para el desplegable
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+    }
+}
+
+
 struct HeaderView: View {
     @State var query: String = ""
+    @State var text: String = ""
     var body: some View {
         VStack {
             HStack {
@@ -55,9 +120,13 @@ struct HeaderView: View {
                         .foregroundColor(.red)
                         .font(.system(size: 30))
                 }
-                
             }
-
+            HStack (spacing: -80) {
+                FilterView(text: "Filter", width: CGFloat(82))
+                FilterView(text: "Generation", width: CGFloat(120))
+                FilterView(text: "Region", width: CGFloat(85))
+            }
+            .offset(x: -35)
         }
     }
 }
