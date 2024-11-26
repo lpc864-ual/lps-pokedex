@@ -17,7 +17,9 @@ struct FooterView: View {
                 Image("battles")
                     .resizable()
                     .frame(width: 61, height: 65)
+
             }
+            
             // Boton de menu
             Button(action: {
                 
