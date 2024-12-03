@@ -36,20 +36,20 @@ struct BusquedaView: View {
 }
 
 struct FilterView: View {
-    // Texto boton
+    // Texto del botón principal
     var text: String
     
-    // Width
+    // Ancho del botón principal y de las opciones
     var width: CGFloat
+    
+    // Diccionario de opciones y colores asociados
+    var optionsWithColors: [String: Color]
     
     // Estado para controlar si el listado de filtros está abierto
     @State private var isOpen: Bool = false
     
     // Estado para manejar el filtro seleccionado
     @State private var selectedFilter: String = ""
-    
-    // Opciones de filtro disponibles
-    let options = ["1", "2", "3", "4"]
     
     var body: some View {
         VStack {
@@ -58,7 +58,7 @@ struct FilterView: View {
                 // Alterna el estado de visibilidad de las opciones
                 isOpen.toggle()
             }) {
-                Text(text)
+                Text(selectedFilter.isEmpty ? text : selectedFilter) // Muestra el texto seleccionado o el texto genérico
                     .padding()
                     .frame(width: width, height: 32)
                     .background(Color.gray.opacity(0.1))
@@ -68,27 +68,36 @@ struct FilterView: View {
             
             // Mostrar las opciones solo si isOpen es verdadero
             if isOpen {
-                VStack {
-                    ForEach(options, id: \.self) { option in
-                        Button(action: {
-                            // Seleccionar filtro y cerrar las opciones
-                            selectedFilter = option
-                            isOpen = false
-                        }) {
-                            Text(option)
-                                .padding()
-                                .frame(width: width, height: 32)
-                                .background(Color.white)
-                                .cornerRadius(8)
-                                .foregroundColor(.black)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.gray, lineWidth: 1)
-                                )
+                // Hacer scroll si hay demasiados elementos
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 8) {
+                        // Dividir las opciones en filas de cinco elementos
+                        ForEach(chunked(Array(optionsWithColors.keys.sorted()), into: 5), id: \.self) { row in
+                            HStack(spacing: 20) {
+                                ForEach(row, id: \.self) { option in
+                                    Button(action: {
+                                        // Seleccionar filtro y cerrar las opciones
+                                        selectedFilter = option
+                                        isOpen = false
+                                    }) {
+                                        Text(option)
+                                            .padding()
+                                            .frame(width: 100, height: 32) // Ajustar ancho por fila
+                                            .background(optionsWithColors[option] ?? Color.white)
+                                            .cornerRadius(8)
+                                            .foregroundColor(.black)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(Color.gray, lineWidth: 1)
+                                            )
+                                    }
+                                }
+                            }
+                            .offset(x: -40)
                         }
-                        .padding(.top, 4)
                     }
                 }
+                .frame(maxHeight: 200)
                 .transition(.move(edge: .top)) // Transición de deslizamiento
                 .animation(.easeInOut, value: isOpen) // Animación para el desplegable
             }
@@ -96,12 +105,54 @@ struct FilterView: View {
         .padding()
         .frame(maxWidth: .infinity)
     }
+    
+    // Función auxiliar para dividir el array en grupos de tamaño dado
+    func chunked<T>(_ array: [T], into size: Int) -> [[T]] {
+        stride(from: 0, to: array.count, by: size).map {
+            Array(array[$0..<min($0 + size, array.count)])
+        }
+    }
 }
-
 
 struct HeaderView: View {
     @State var query: String = ""
     @State var text: String = ""
+    @State private var selectedTypes: Set<String> = []
+    let typeColors: [String: Color] = [
+        "Normal": Color("normalColor"),
+        "Fire": Color("fireColor"),
+        "Water": Color("waterColor"),
+        "Grass": Color("grassColor"),
+        "Electric": Color("electricColor"),
+        "Ice": Color("iceColor"),
+        "Fighting": Color("fightColor"),
+        "Flying": Color("flyingColor"),
+        "Poison": Color("poisonColor"),
+        "Ground": Color("groundColor"),
+        "Rock": Color("rockColor"),
+        "Bug": Color("bugColor"),
+        "Ghost": Color("ghostColor"),
+        "Steel": Color("steelColor"),
+        "Dragon": Color("dragonColor"),
+        "Dark": Color("darkColor"),
+        "Fairy": Color("fairyColor"),
+        "Psychic": Color("psychicColor")
+    ]
+    
+    var selectedGenerations: Set<String> = []
+    let generationColors: [String: Color] = [
+        "1° Kanto": Color("kantoColor"),
+        "2° Johto": Color("johtoColor"),
+        "3° Hoenn": Color("hoennColor"),
+        "4° Sinnoh": Color("sinnohColor"),
+        "5° Teselia": Color("teseliaColor"),
+        "6° Kalos": Color("kalosColor"),
+        "7° Alola": Color("alolaColor"),
+        "8° Galar": Color("galarColor"),
+        "9° Paldea": Color("paldeaColor")
+    ]
+
+    
     var body: some View {
         VStack {
             HStack {
@@ -121,12 +172,11 @@ struct HeaderView: View {
                         .font(.system(size: 30))
                 }
             }
-            HStack (spacing: -80) {
-                FilterView(text: "Filter", width: CGFloat(82))
-                FilterView(text: "Generation", width: CGFloat(120))
-                FilterView(text: "Region", width: CGFloat(85))
+            HStack (spacing: -180) {
+                FilterView(text: "Type", width: CGFloat(82), optionsWithColors: typeColors)
+                FilterView(text: "Generation", width: CGFloat(120), optionsWithColors: generationColors)
             }
-            .offset(x: -35)
+            .offset(x: -86)
         }
     }
 }
