@@ -54,6 +54,7 @@ struct FilterView: View {
     var body: some View {
         VStack {
             // Botón para mostrar las opciones de filtro
+
             Button(action: {
                 // Alterna el estado de visibilidad de las opciones
                 isOpen.toggle()
@@ -71,7 +72,11 @@ struct FilterView: View {
                 // Hacer scroll si hay demasiados elementos
                 VStack(alignment: .leading, spacing: 8) {
                     // Dividir las opciones en filas de cinco elementos
-                    ForEach(chunked(Array(optionsWithColors.keys.sorted()), into: 3), id: \.self) { row in
+                    ForEach(
+                        chunked(
+                            Array(optionsWithColors.keys.sorted()), into: 3),
+                        id: \.self
+                    ) { row in
                         HStack(spacing: 10) {
                             ForEach(row, id: \.self) { option in
                                 Button(action: {
@@ -82,10 +87,16 @@ struct FilterView: View {
                                     Text(option)
                                         .padding()
                                         .frame(width: width, height: 32)  // Ajustar ancho por fila
-                                        .background(optionsWithColors[option] ?? Color.white)
+                                        .background(
+                                            optionsWithColors[option]
+                                                ?? Color.white
+                                        )
                                         .cornerRadius(8)
                                         .foregroundColor(.black)
-                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray, lineWidth: 1))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(
+                                                    Color.gray, lineWidth: 1))
                                 }
                             }
                         }
