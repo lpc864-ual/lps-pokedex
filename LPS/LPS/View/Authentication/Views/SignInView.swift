@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct SignInView: View {
-    // @StateObject private var viewModel = SignInViewModel()
+    @EnvironmentObject var vm: ViewModel
     @State private var username: String = ""
     @State private var password: String = ""
+    @State private var alertMessage: String = ""
+    @State private var showAlert: Bool = false
     @State private var isNavigationDashboard: Bool = false
     @State private var isNavigationSignUp: Bool = false
-    @State private var showAlert: Bool = false
-    @State private var alertMessage: String = ""
     
     var body: some View {
         NavigationView {
@@ -95,7 +95,7 @@ struct SignInView: View {
                             return
                         }
                         
-                        let loginResult = CoreDataManager.instance.loginUser(username: username, password: password)
+                        let loginResult = ViewModel.instance.loginUser(username: username, password: password)
                         if loginResult == "Inicio de sesión exitoso." {
                             // Si el inicio de sesión es exitoso, navega a la siguiente pantalla
                             self.isNavigationDashboard = true
@@ -140,7 +140,7 @@ struct SignInView: View {
                 }
                 
                 NavigationLink(
-                    destination: DashboardView(username: username),
+                    destination: MenuView(),
                     isActive: $isNavigationDashboard,
                     label: { EmptyView() }
                 )

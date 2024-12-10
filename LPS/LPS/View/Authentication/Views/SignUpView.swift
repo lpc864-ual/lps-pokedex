@@ -123,7 +123,7 @@ struct SignUpView: View {
                             }
                             
                             // Verificamos que el username no este usado desde el backend
-                            let loginResult = CoreDataManager.instance.registerUser(username: username, password: password)
+                            let loginResult = ViewModel.instance.registerUser(username: username, password: password)
                             if loginResult == "Registro exitoso." {
                                 self.isNavigationDashboard = true
                             } else {
@@ -174,7 +174,7 @@ struct SignUpView: View {
                 )
                 
                 NavigationLink(
-                    destination: DashboardView(username: username),
+                    destination: MenuView(),
                     isActive: $isNavigationDashboard,
                     label: { EmptyView() }
                 )

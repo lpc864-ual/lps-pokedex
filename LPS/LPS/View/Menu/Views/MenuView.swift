@@ -1,8 +1,8 @@
 //
-//  HeaderView.swift
+//  MenuView.swift
 //  LPS
 //
-//  Created by Aula03 on 12/11/24.
+//  Created by Aula03 on 10/12/24.
 //
 
 import SwiftUI
@@ -119,7 +119,8 @@ struct FilterView: View {
 }
 
 struct HeaderView: View {
-    var username: String
+    
+    var username: String = ""
     @State var query: String = ""
     @State var text: String = ""
     @State private var selectedTypes: Set<String> = []
@@ -160,10 +161,11 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                Text("Hi! Stanley 👋")
+                Text("Hi! " + username + " 👋")
                     .font(.system(size: 34))
                     .fontWeight(.medium)
-                    .offset(x: -80)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .offset(x: 20)
             }
 
             HStack {
@@ -189,8 +191,116 @@ struct HeaderView: View {
     }
 }
 
-struct HeaderView_Previews: PreviewProvider {
+struct CardView: View {
+    var name: String
+    var username: String
+    var body: some View {
+
+        VStack {
+            HStack {
+                Text(name)
+                    .foregroundStyle(.white)
+                    .fontWeight(.bold)
+                Text("#001")
+                    .foregroundStyle(.black.opacity(0.4))
+            }
+            
+            HStack {
+                VStack{
+                    Text("Grass")
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .frame(height: -5)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 32)
+                                .stroke(Color.white, lineWidth: 2)
+                        )
+                        .offset(x: -5)
+                    
+                    Text("Poison")
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .frame(height: -5)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 32)
+                                .stroke(Color.white, lineWidth: 2)
+                        )
+                }
+                ZStack {
+                    Image("pokeball_bg")
+                    Image("bulbasur")
+                }
+                .offset(x: 15, y: 15)
+                
+            }
+        }
+        .padding()
+        .background(.green)
+        .cornerRadius(20)
+    }
+}
+
+struct FooterView: View {
+    var username: String
+    var body: some View {
+        HStack(spacing: 80) {
+            // Boton de batallas
+            Button(action: {
+                
+            }) {
+                Image("battles")
+                    .resizable()
+                    .frame(width: 61, height: 65)
+
+            }
+            
+            // Boton de menu
+            Button(action: {
+                
+            }) {
+                Image("pokeball")
+                    .resizable()
+                    .frame(width: 61, height: 65)
+            }
+            // Boton de perfil
+            Button(action: {
+                
+            }) {
+                Image("profile")
+                    .resizable()
+                    .frame(width: 61, height: 65)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0))
+        
+    }
+}
+
+struct MenuView: View {
+    @EnvironmentObject var vm: ViewModel
+    //@State var isBattleView: Bool
+    
+    var body: some View {
+        VStack {
+            HeaderView(username: vm.currentUserNickname)
+            CardView(name: "bulbasur", username: vm.currentUserNickname)
+            Spacer()
+            FooterView(username: vm.currentUserNickname)
+            
+        }
+        .navigationBarBackButtonHidden(true)
+    }
+}
+
+struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
-        HeaderView(username: "")
+        let previewViewModel = ViewModel.instance
+        previewViewModel.currentUserNickname = "Luis"
+        
+        return MenuView()
+            .environmentObject(previewViewModel)
     }
 }

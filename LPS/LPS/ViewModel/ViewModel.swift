@@ -22,15 +22,19 @@ struct Move: Identifiable, Equatable {
     let power: Int
 }
 
-class CoreDataManager {
+class ViewModel: ObservableObject {
 
     // Singleton
-    static let instance = CoreDataManager()
-
+    static let instance = ViewModel()
+    
     // NSPersistentContainer y contexto de Core Data
+    
     let contenedor: NSPersistentContainer
     let contexto: NSManagedObjectContext
 
+    //
+    var currentUserNickname: String
+    
     init() {
         contenedor = NSPersistentContainer(name: "PokedexModel")
         contenedor.loadPersistentStores { (descripcion, error) in
@@ -41,16 +45,7 @@ class CoreDataManager {
             }
         }
         contexto = contenedor.viewContext
-    }
-
-    // Método para guardar los cambios en el contexto de Core Data
-    func save() {
-        do {
-            try contexto.save()
-            print("Datos almacenados correctamente")
-        } catch let error {
-            print("Error al guardar datos \(error)")
-        }
+        currentUserNickname = ""
     }
 
     // Método auxiliar para obtener un usuario por su nombre de usuario
@@ -74,6 +69,7 @@ class CoreDataManager {
         if let user = getUser(username: username) {
             // Comparamos las contraseñas
             if user.password == password {
+                currentUserNickname = username
                 print("Inicio de sesión exitoso para \(username).")
                 return "Inicio de sesión exitoso."
             } else {
@@ -86,6 +82,16 @@ class CoreDataManager {
         }
     }
 
+    // Método para guardar los cambios en el contexto de Core Data
+    func save() {
+        do {
+            try contexto.save()
+            print("Datos almacenados correctamente")
+        } catch let error {
+            print("Error al guardar datos \(error)")
+        }
+    }
+    
     // Método para registrar un nuevo usuario
     func registerUser(username: String, password: String) -> String {
         // Verificamos si el usuario ya existe
@@ -101,13 +107,14 @@ class CoreDataManager {
 
         // Guardamos los cambios
         save()
+        currentUserNickname = username
         print("Usuario \(username) registrado correctamente.")
         return "Registro exitoso."
     }
 
     // Método para eliminar todos los usuarios
     func deleteAllUsers() {
-        let context = CoreDataManager.instance.contexto
+        let context = ViewModel.instance.contexto
 
         // 1. Crear una solicitud de eliminación (delete request)
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> =
@@ -191,8 +198,6 @@ class CoreDataManager {
     @State var move_names: [String] = []
     @State var moves: [Move] = []
     @State var move_offset: Int = 0
-
-    
 
     func pokeApi(endpoint: String) async -> [String: Any] {
         guard let url = URL(string: "https://pokeapi.co/api/v2/\(endpoint)")
