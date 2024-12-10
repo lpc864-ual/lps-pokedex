@@ -9,12 +9,12 @@ import SwiftUI
 
 struct BusquedaView: View {
     @Binding var text: String
-
+    
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color.gray)
-
+            
             ZStack(alignment: .leading) {
                 if text.isEmpty {
                     Text("Buscar...")
@@ -23,7 +23,7 @@ struct BusquedaView: View {
                 TextField("", text: $text)
                     .frame(height: 8)
             }
-
+            
         }
         .padding()
         .frame(width: 325, height: 40)
@@ -31,30 +31,30 @@ struct BusquedaView: View {
             RoundedRectangle(cornerRadius: 25)
                 .stroke(Color.black.opacity(0.5), lineWidth: 2)
         )
-
+        
     }
 }
 
 struct FilterView: View {
     // Texto del botón principal
     var text: String
-
+    
     // Ancho del botón principal y de las opciones
     var width: CGFloat
-
+    
     // Diccionario de opciones y colores asociados
     var optionsWithColors: [String: Color]
-
+    
     // Estado para controlar si el listado de filtros está abierto
     @State private var isOpen: Bool = false
-
+    
     // Estado para manejar el filtro seleccionado
     @State private var selectedFilter: String = ""
-
+    
     var body: some View {
         VStack {
             // Botón para mostrar las opciones de filtro
-
+            
             Button(action: {
                 // Alterna el estado de visibilidad de las opciones
                 isOpen.toggle()
@@ -66,7 +66,7 @@ struct FilterView: View {
                     .cornerRadius(8)
                     .foregroundColor(.black)
             }
-
+            
             // Mostrar las opciones solo si isOpen es verdadero
             if isOpen {
                 // Hacer scroll si hay demasiados elementos
@@ -89,7 +89,7 @@ struct FilterView: View {
                                         .frame(width: width, height: 32)  // Ajustar ancho por fila
                                         .background(
                                             optionsWithColors[option]
-                                                ?? Color.white
+                                            ?? Color.white
                                         )
                                         .cornerRadius(8)
                                         .foregroundColor(.black)
@@ -103,13 +103,13 @@ struct FilterView: View {
                         .offset(x: 68)
                     }
                 }
-
+                
             }
         }
         .padding()
         .frame(maxWidth: .infinity)
     }
-
+    
     // Función auxiliar para dividir el array en grupos de tamaño dado
     func chunked<T>(_ array: [T], into size: Int) -> [[T]] {
         stride(from: 0, to: array.count, by: size).map {
@@ -144,7 +144,7 @@ struct HeaderView: View {
         "Fairy": Color("fairyColor"),
         "Psychic": Color("psychicColor"),
     ]
-
+    
     var selectedGenerations: Set<String> = []
     let generationColors: [String: Color] = [
         "1° Kanto": Color("kantoColor"),
@@ -157,7 +157,7 @@ struct HeaderView: View {
         "8° Galar": Color("galarColor"),
         "9° Paldea": Color("paldeaColor"),
     ]
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -167,11 +167,11 @@ struct HeaderView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .offset(x: 20)
             }
-
+            
             HStack {
                 BusquedaView(text: $query)
                 Button {
-
+                    
                 } label: {
                     Image(systemName: 1 == 1 ? "heart" : "heart.fill")
                         .foregroundColor(.red)
@@ -195,7 +195,7 @@ struct CardView: View {
     var name: String
     var username: String
     var body: some View {
-
+        
         VStack {
             HStack {
                 Text(name)
@@ -239,8 +239,22 @@ struct CardView: View {
         .padding()
         .background(.green)
         .cornerRadius(20)
+        .scaledToFit()
+        
     }
 }
+
+struct BattleFooterView: View {
+    var body: some View {
+        HStack(spacing: 80) {
+            
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0))
+        
+    }
+}
+
 
 struct FooterView: View {
     @Binding var view : Int
@@ -254,6 +268,7 @@ struct FooterView: View {
                     .resizable()
                     .frame(width: 61, height: 65)
             }
+            
             
             // Boton de menu
             Button(action: {
@@ -281,13 +296,30 @@ struct FooterView: View {
 
 struct MenuView: View {
     @EnvironmentObject var vm: ViewModel;
-    @State var view: Int = 0
+    @State var view: Int = 1
+    let cardNames = ["bulbasaur", "ivysaur", "venusaur", "charmander", "charmeleon", "squirtle", "squirtle", "squirtle", "squirtle"]
     
     var body: some View {
         VStack {
             if (view != 2) {
                 HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname)
-                CardView(name: "bulbasur", username: vm.currentUserNickname)
+                ScrollView {
+                    VStack {
+                        ForEach(chunked(cardNames, into: 2), id: \.self) { row in
+                            HStack {
+                                ForEach(row, id: \.self) { name in
+                                    CardView(name: name, username: vm.currentUserNickname)
+                                        .frame(maxWidth: 185,alignment: .leading)
+                                }
+                                if row.count == 1 {
+                                    Spacer()
+                                }
+                            }
+                            .padding(2)
+                        }
+                    }
+                    .padding(10)
+                }
             }
             else {
                 // Profile
@@ -297,6 +329,11 @@ struct MenuView: View {
             
         }
         .navigationBarBackButtonHidden(true)
+    }
+    func chunked<T>(_ array: [T], into size: Int) -> [[T]] {
+        stride(from: 0, to: array.count, by: size).map {
+            Array(array[$0..<min($0 + size, array.count)])
+        }
     }
 }
 
