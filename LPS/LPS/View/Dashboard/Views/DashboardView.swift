@@ -16,7 +16,6 @@ import SwiftUI
 struct DashboardView: View {
     var username: String
     @State var backend = CoreDataManager()
-    @State private var evolutions: [(Pokemon, String, Pokemon)] = []
     
     var body: some View {
         VStack {
@@ -26,11 +25,6 @@ struct DashboardView: View {
             FooterView(username: username)
         }
         .navigationBarBackButtonHidden(true)
-        .task {
-            evolutions = await backend.loadEvolutions(evolution_chain_id: 1)
-            print(evolutions)
-            
-        }
     }
 }
 
