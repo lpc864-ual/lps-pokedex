@@ -120,6 +120,8 @@ struct FilterView: View {
 
 struct HeaderView: View {
     @Binding var view: Int
+    //@State var isFavorite: Bool = false
+    
     var username: String = ""
     @State var query: String = ""
     @State var text: String = ""
