@@ -81,7 +81,7 @@ class CoreDataManager {
         // Guardamos los cambios
         save()
         print("Usuario \(username) registrado correctamente.")
-        return "Registro exitoso."
+        return "Registro exitoso. " + username
     }
 
     // Método para eliminar todos los usuarios
@@ -105,6 +105,61 @@ class CoreDataManager {
         } catch let error {
             print("Error al eliminar todos los usuarios: \(error)")
         }
+    }
+    
+    // Método para obtener la lista de Pokémon favoritos de un usuario
+    func getFavoritos(username: String) -> [String] {
+        guard let user = getUser(username: username) else {
+            print("Usuario no encontrado.")
+            return []
+        }
+        
+        // Extraer los nombres de los Pokémon favoritos
+        if let favoritos = user.favoritos as? Set<PokemonFavoritoEntity> {
+            return favoritos.compactMap { $0.pokemon_name }
+        }
+        
+        return []
+    }
+    
+    // Método para verificar si un Pokémon está en los favoritos de un usuario
+    func isFavorito(username: String, pokemonName: String) -> Bool {
+        guard let user = getUser(username: username) else {
+            print("Usuario no encontrado.")
+            return false
+        }
+
+        // Buscar si el Pokémon ya está en los favoritos del usuario
+        if let favoritos = user.favoritos as? Set<PokemonFavoritoEntity> {
+            return favoritos.contains(where: { $0.pokemon_name == pokemonName })
+        }
+
+        return false
+    }
+    
+    // Método para añadir o eliminar un Pokémon favorito de un usuario
+    func toggleFavorito(username: String, pokemonName: String) {
+        guard let user = getUser(username: username) else {
+            print("Usuario no encontrado.")
+            return
+        }
+
+        // Buscar si el Pokémon ya está en los favoritos del usuario
+        if let favoritos = user.favoritos as? Set<PokemonFavoritoEntity>,
+           let pokemonFavoritoExistente = favoritos.first(where: { $0.pokemon_name == pokemonName }) {
+            // Si ya existe, eliminarlo
+            contexto.delete(pokemonFavoritoExistente)
+            print("\(pokemonName) eliminado de los favoritos de \(username).")
+        } else {
+            // Si no existe, agregarlo
+            let nuevoFavorito = PokemonFavoritoEntity(context: contexto)
+            nuevoFavorito.pokemon_name = pokemonName
+            nuevoFavorito.persona = user
+            print("\(pokemonName) añadido a los favoritos de \(username).")
+        }
+
+        // Guardar los cambios
+        save()
     }
 
     // Backend PokeAPI

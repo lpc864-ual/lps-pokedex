@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24B83" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
-    <entity name="Entity" representedClassName="Entity" syncable="YES" codeGenerationType="class"/>
     <entity name="PersonaEntity" representedClassName="PersonaEntity" syncable="YES" codeGenerationType="class">
-        <attribute name="password" optional="YES" attributeType="String"/>
-        <attribute name="username" optional="YES" attributeType="String"/>
+        <attribute name="password" attributeType="String"/>
+        <attribute name="username" attributeType="String"/>
+        <relationship name="favoritos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="PokemonFavoritoEntity" inverseName="persona" inverseEntity="PokemonFavoritoEntity"/>
+    </entity>
+    <entity name="PokemonFavoritoEntity" representedClassName="PokemonFavoritoEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="pokemon_name" attributeType="String"/>
+        <relationship name="persona" maxCount="1" deletionRule="Cascade" destinationEntity="PersonaEntity" inverseName="favoritos" inverseEntity="PersonaEntity"/>
     </entity>
 </model>
