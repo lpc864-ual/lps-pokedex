@@ -174,7 +174,7 @@ struct SignUpView: View {
                 )
                 
                 NavigationLink(
-                    destination: DashboardView(),
+                    destination: DashboardView(username: username),
                     isActive: $isNavigationDashboard,
                     label: { EmptyView() }
                 )

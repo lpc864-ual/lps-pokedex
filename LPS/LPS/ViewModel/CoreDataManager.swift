@@ -1,6 +1,27 @@
 import CoreData
 import SwiftUI
 
+struct Pokemon: Identifiable, Equatable {
+    let id: Int
+    let name: String
+    let description: String
+    let types: [String]
+    let weight: Float
+    let height: Float
+    let stats: [String: Int]
+    let image: Image
+    let image_shiny: Image
+    let evolution_chain_id: Int
+}
+
+struct Move: Identifiable, Equatable {
+    let id: Int
+    let name: String
+    let description: String
+    let accuracy: Int
+    let power: Int
+}
+
 class CoreDataManager {
 
     // Singleton
@@ -81,7 +102,7 @@ class CoreDataManager {
         // Guardamos los cambios
         save()
         print("Usuario \(username) registrado correctamente.")
-        return "Registro exitoso. " + username
+        return "Registro exitoso."
     }
 
     // Método para eliminar todos los usuarios
@@ -171,26 +192,7 @@ class CoreDataManager {
     @State var moves: [Move] = []
     @State var move_offset: Int = 0
 
-    struct Pokemon: Identifiable, Equatable {
-        let id: Int
-        let name: String
-        let description: String
-        let types: [String]
-        let weight: Float
-        let height: Float
-        let stats: [String: Int]
-        let image: Image
-        let image_shiny: Image
-        let evolution_chain_id: Int
-    }
-
-    struct Move: Identifiable, Equatable {
-        let id: Int
-        let name: String
-        let description: String
-        let accuracy: Int
-        let power: Int
-    }
+    
 
     func pokeApi(endpoint: String) async -> [String: Any] {
         guard let url = URL(string: "https://pokeapi.co/api/v2/\(endpoint)")

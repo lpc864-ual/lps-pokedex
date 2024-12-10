@@ -119,6 +119,7 @@ struct FilterView: View {
 }
 
 struct HeaderView: View {
+    var username: String
     @State var query: String = ""
     @State var text: String = ""
     @State private var selectedTypes: Set<String> = []
@@ -190,6 +191,6 @@ struct HeaderView: View {
 
 struct HeaderView_Previews: PreviewProvider {
     static var previews: some View {
-        HeaderView()
+        HeaderView(username: "")
     }
 }

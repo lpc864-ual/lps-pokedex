@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct FooterView: View {
+    var username: String
     var body: some View {
         HStack(spacing: 80) {
             // Boton de batallas
@@ -45,6 +46,6 @@ struct FooterView: View {
 
 struct FooterView_Previews: PreviewProvider {
     static var previews: some View {
-        FooterView()
+        FooterView(username: "")
     }
 }

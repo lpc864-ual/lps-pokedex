@@ -11,10 +11,11 @@ struct SignInView: View {
     // @StateObject private var viewModel = SignInViewModel()
     @State private var username: String = ""
     @State private var password: String = ""
-    @State private var isNavigationActive: Bool = false
+    @State private var isNavigationDashboard: Bool = false
+    @State private var isNavigationSignUp: Bool = false
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -28,13 +29,13 @@ struct SignInView: View {
                                     blue: 45.0 / 255.0)
                             )
                             .frame(height: geometry.size.height / 2)
-
+                        
                         Rectangle()
                             .fill(Color.white)
                             .frame(height: geometry.size.height / 2)
                     }
                 }
-
+                
                 // Contenido superpuesto
                 VStack {
                     // Imagenes
@@ -42,38 +43,38 @@ struct SignInView: View {
                         Image("pokedex")
                             .resizable()
                             .frame(width: 285, height: 98, alignment: .center)
-
+                        
                         Image("pokeball")
                             .resizable()
                             .frame(width: 150, height: 150, alignment: .center)
                     }
                     .padding(.top, 100)
-
+                    
                     // Formulario
                     VStack(spacing: 15) {
                         Text("Sign In")
                             .font(.system(size: 28, weight: .bold))
-
+                        
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Username")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-
+                            
                             TextField("", text: $username)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .autocapitalization(.none)
                         }
-
+                        
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Password")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-
+                            
                             SecureField("", text: $password)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
                     }
-
+                    
                     // Botones
                     Button(action: {
                         if (username.isEmpty && password.isEmpty) {
@@ -97,7 +98,7 @@ struct SignInView: View {
                         let loginResult = CoreDataManager.instance.loginUser(username: username, password: password)
                         if loginResult == "Inicio de sesión exitoso." {
                             // Si el inicio de sesión es exitoso, navega a la siguiente pantalla
-                            self.isNavigationActive = true
+                            self.isNavigationDashboard = true
                         } else {
                             // Si el inicio de sesión falla, mostrar el mensaje de error
                             alertMessage = loginResult
@@ -112,9 +113,9 @@ struct SignInView: View {
                             .cornerRadius(8)
                             .fontWeight(.bold)
                     }
-
+                    
                     Button(action: {
-                        self.isNavigationActive = true
+                        self.isNavigationSignUp = true
                     }) {
                         Text("You don't have an account?")
                             .foregroundColor(.black)
@@ -137,11 +138,17 @@ struct SignInView: View {
                         title: Text("Error"), message: Text(alertMessage),
                         dismissButton: .default(Text("OK")))
                 }
-
+                
+                NavigationLink(
+                    destination: DashboardView(username: username),
+                    isActive: $isNavigationDashboard,
+                    label: { EmptyView() }
+                )
+                
                 NavigationLink(
                     destination: SignUpView(),
-                    isActive: $isNavigationActive,
-                    label: { EmptyView() } 
+                    isActive: $isNavigationSignUp,
+                    label: { EmptyView() }
                 )
             }
         }.navigationBarBackButtonHidden(true)

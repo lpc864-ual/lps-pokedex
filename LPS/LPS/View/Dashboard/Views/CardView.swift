@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CardView: View {
     var name: String
-    var imageName: String
+    var username: String
     var body: some View {
 
         VStack {
@@ -46,7 +46,7 @@ struct CardView: View {
                 }
                 ZStack {
                     Image("pokeball_bg")
-                    Image(imageName)
+                    Image("bulbasur")
                 }
                 .offset(x: 15, y: 15)
                 
@@ -60,6 +60,6 @@ struct CardView: View {
 
 struct CardView_Previews: PreviewProvider {
     static var previews: some View {
-        CardView(name: "Bulbasur", imageName: "bulbasur")
+        CardView(name: "bulbasur", username: "")
     }
 }
