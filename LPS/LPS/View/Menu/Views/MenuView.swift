@@ -119,7 +119,7 @@ struct FilterView: View {
 }
 
 struct HeaderView: View {
-    
+    @Binding var view: Int
     var username: String = ""
     @State var query: String = ""
     @State var text: String = ""
@@ -161,7 +161,7 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                Text("Hi! " + username + " 👋")
+                Text(view == 0 ? "Team Select" : "Hi! " + username + " 👋")
                     .font(.system(size: 34))
                     .fontWeight(.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -243,30 +243,30 @@ struct CardView: View {
 }
 
 struct FooterView: View {
-    var username: String
+    @Binding var view : Int
     var body: some View {
         HStack(spacing: 80) {
             // Boton de batallas
             Button(action: {
-                
+                view = 0
             }) {
                 Image("battles")
                     .resizable()
                     .frame(width: 61, height: 65)
-
             }
             
             // Boton de menu
             Button(action: {
-                
+                view = 1
             }) {
                 Image("pokeball")
                     .resizable()
                     .frame(width: 61, height: 65)
             }
+            
             // Boton de perfil
             Button(action: {
-                
+                view = 2
             }) {
                 Image("profile")
                     .resizable()
@@ -280,15 +280,20 @@ struct FooterView: View {
 }
 
 struct MenuView: View {
-    @EnvironmentObject var vm: ViewModel
-    //@State var isBattleView: Bool
+    @EnvironmentObject var vm: ViewModel;
+    @State var view: Int = 0
     
     var body: some View {
         VStack {
-            HeaderView(username: vm.currentUserNickname)
-            CardView(name: "bulbasur", username: vm.currentUserNickname)
+            if (view != 2) {
+                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname)
+                CardView(name: "bulbasur", username: vm.currentUserNickname)
+            }
+            else {
+                // Profile
+            }
             Spacer()
-            FooterView(username: vm.currentUserNickname)
+            FooterView(view: $view)
             
         }
         .navigationBarBackButtonHidden(true)
