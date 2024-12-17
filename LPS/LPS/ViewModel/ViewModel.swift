@@ -291,19 +291,27 @@ class ViewModel: ObservableObject {
         }
         return pokemons
     }
+    
+    func loadMorePokemons(
+        currentPokemons: [Pokemon],
+        pokemonNames: [String],
+        offset: Int,
+        limit: Int = 10
+    ) async -> [Pokemon] {
+        // Verificar si hay más Pokémon para cargar
+        guard offset < pokemonNames.count else {
+            return currentPokemons // Si no hay más Pokémon, devuelve la lista actual
+        }
 
-    private func loadMorePokemons() async {
-        guard pokemon_offset < pokemon_names.count else {
-            return
-        }
+        // Obtener los nuevos Pokémon
         let newPokemons = await listPokemons(
-            pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
-        if !newPokemons.isEmpty {
-            DispatchQueue.main.async {
-                self.pokemons.append(contentsOf: newPokemons)
-                self.pokemon_offset += newPokemons.count
-            }
-        }
+            pokemon_names: pokemonNames,
+            offset: offset,
+            limit: limit
+        )
+        
+        // Devolver la lista actualizada
+        return currentPokemons + newPokemons
     }
 
     func filterPokemons(
@@ -411,7 +419,7 @@ class ViewModel: ObservableObject {
         return evolutions
     }
 
-    private func loadMoreMoves() async {
+    func loadMoreMoves() async {
         guard move_offset < move_names.count else {
             return
         }

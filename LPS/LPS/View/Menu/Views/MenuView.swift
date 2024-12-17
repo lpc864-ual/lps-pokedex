@@ -194,55 +194,46 @@ struct HeaderView: View {
 }
 
 struct CardView: View {
-    var name: String
+    var pokemon: Pokemon
     var username: String
     var body: some View {
         
         VStack {
             HStack {
-                Text(name)
+                Text(pokemon.name)
                     .foregroundStyle(.white)
                     .fontWeight(.bold)
-                Text("#001")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("#" + String(format: "%04d", pokemon.id))
                     .foregroundStyle(.black.opacity(0.4))
             }
             
             HStack {
-                VStack{
-                    Text("Grass")
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(height: -5)
-                        .padding()
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 32)
-                                .stroke(Color.white, lineWidth: 2)
-                        )
-                        .offset(x: -5)
-                    
-                    Text("Poison")
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(height: -5)
-                        .padding()
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 32)
-                                .stroke(Color.white, lineWidth: 2)
-                        )
+                VStack {
+                    ForEach(pokemon.types, id: \.self) { type in
+                        Text(type)
+                            .frame(width: 60, height: 30)
+                            .font(.system(size: 12))
+                            .fontWeight(.medium)
+                            .foregroundStyle(.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 32)
+                                    .stroke(Color.white, lineWidth: 2)
+                            )
+                            
+                    }
                 }
                 ZStack {
                     Image("pokeball_bg")
-                    Image("bulbasur")
+                    pokemon.image.resizable().scaledToFit().frame(width: 90, height: 100)
                 }
-                .offset(x: 15, y: 15)
-                
+                .offset(x: 15, y: 20)
             }
         }
         .padding()
         .background(.green)
         .cornerRadius(20)
         .scaledToFit()
-        
     }
 }
 
@@ -299,6 +290,9 @@ struct FooterView: View {
 struct MenuView: View {
     @EnvironmentObject var vm: ViewModel;
     @State var view: Int = 1
+    @State var pokemon_names: [String] = []
+    @State var pokemons: [Pokemon] = []
+    @State var pokemon_offset: Int = 0
     let cardNames = ["bulbasaur", "ivysaur", "venusaur", "charmander", "charmeleon", "squirtle", "squirtle", "squirtle", "squirtle"]
     
     var body: some View {
@@ -307,44 +301,44 @@ struct MenuView: View {
                 HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname)
                 ScrollView {
                     VStack {
-                        ForEach(chunked(cardNames, into: 2), id: \.self) { row in
+                        ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
                             HStack {
-                                ForEach(row, id: \.self) { name in
-                                    CardView(name: name, username: vm.currentUserNickname)
-                                        .frame(maxWidth: 185,alignment: .leading)
-                                }
-                                if row.count == 1 {
+                                CardView(pokemon: pokemons[index], username: vm.currentUserNickname)
+                                if index + 1 < pokemons.count {
+                                    CardView(pokemon: pokemons[index + 1], username: vm.currentUserNickname)
+                                } else {
                                     Spacer()
                                 }
+                            }.padding(0).onAppear {
+                                if pokemons[index] == pokemons.dropLast().last {
+                                    Task {
+                                        pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
+                                        pokemon_offset = pokemons.count
+                                    }
+                                }
                             }
-                            .padding(2)
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 2)
                     }
-                    .padding(10)
+                }.task {
+                    pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: "", typeFilter: [], generationFilter: 1)
+                    pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
+                    pokemon_offset += 10
                 }
+                Spacer()
+                FooterView(view: $view)
             }
-            else {
-                // Profile
-            }
-            Spacer()
-            FooterView(view: $view)
+        }.navigationBarBackButtonHidden(true)
+    }
+    
+    struct MenuView_Previews: PreviewProvider {
+        static var previews: some View {
+            let previewViewModel = ViewModel.instance
+            previewViewModel.currentUserNickname = "Luis"
             
+            return MenuView()
+                .environmentObject(previewViewModel)
         }
-        .navigationBarBackButtonHidden(true)
-    }
-    func chunked<T>(_ array: [T], into size: Int) -> [[T]] {
-        stride(from: 0, to: array.count, by: size).map {
-            Array(array[$0..<min($0 + size, array.count)])
-        }
-    }
-}
-
-struct MenuView_Previews: PreviewProvider {
-    static var previews: some View {
-        let previewViewModel = ViewModel.instance
-        previewViewModel.currentUserNickname = "Luis"
-        
-        return MenuView()
-            .environmentObject(previewViewModel)
     }
 }
