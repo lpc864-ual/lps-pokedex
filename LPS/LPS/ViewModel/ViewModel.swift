@@ -12,6 +12,7 @@ struct Pokemon: Identifiable, Equatable {
     let image: Image
     let image_shiny: Image
     let evolution_chain_id: Int
+    //let generation: String
 }
 
 struct Move: Identifiable, Equatable {
@@ -262,6 +263,8 @@ class ViewModel: ObservableObject {
                 (species["url"] as! String).dropFirst(42).dropLast(1))!
         }
 
+        //let generation = (pokemon_species["generation"] as? [String: Any])?["name"] as? String ?? "Unknown"
+        
         return Pokemon(
             id: id,
             name: name,
@@ -273,6 +276,7 @@ class ViewModel: ObservableObject {
             image: image,
             image_shiny: image_shiny,
             evolution_chain_id: evolution_chain_id
+            //generation: generation
         )
     }
 

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BusquedaView: View {
-    @Binding var text: String
+    @Binding var query: String
 
     var body: some View {
         HStack {
@@ -16,20 +16,18 @@ struct BusquedaView: View {
                 .foregroundColor(Color.gray)
 
             ZStack(alignment: .leading) {
-                if text.isEmpty {
+                if query.isEmpty {
                     Text("Buscar...")
                         .foregroundColor(Color.gray)
                 }
-                TextField("", text: $text)
+                TextField("", text: $query)
                     .frame(height: 8)
             }
 
         }
         .padding()
         .frame(width: 325, height: 40)
-        .overlay(
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(Color.black.opacity(0.5), lineWidth: 2)
+        .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.black.opacity(0.5), lineWidth: 2)
         )
 
     }
@@ -39,7 +37,8 @@ struct BusquedaView: View {
 struct GridView: View {
     let items: [String]
     let colors: [String: Color]
-    let onSelect: (String) -> Void
+    @Binding var selectedFilters: [String]
+    let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
 
     var body: some View {
         let groupedItems = items.chunked(into: 3)
@@ -49,15 +48,32 @@ struct GridView: View {
                 HStack {
                     ForEach(row, id: \.self) { item in
                         Button(action: {
-                            onSelect(item)
+                            if isSingleSelection {
+                                // Si el item actual ya está seleccionado, lo deseleccionamos
+                                if selectedFilters.contains(item.lowercased()) {
+                                    selectedFilters.removeAll()
+                                } else {
+                                    // Si no está seleccionado, lo seleccionamos y deseleccionamos el resto
+                                    selectedFilters = [item.lowercased()]
+                                }
+                            } else {
+                                // Si ya existe, lo eliminamos
+                                if let index = selectedFilters.firstIndex(of: item.lowercased()) {
+                                    selectedFilters.remove(at: index)
+                                } else {
+                                    selectedFilters.append(item.lowercased())
+                                }
+                            }
                         }) {
                             Text(item)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(colors[item] ?? Color.gray)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .cornerRadius(8)
+                                .opacity(selectedFilters.contains(item.lowercased()) ? 1 : 0.2)
                         }
+
                     }
                 }
                 .padding(.horizontal)
@@ -67,6 +83,8 @@ struct GridView: View {
         .offset(y: -20)
     }
 }
+
+
 
 // Extensión para dividir un array en grupos
 extension Array {
@@ -81,7 +99,7 @@ struct HeaderView: View {
     @Binding var view: Int
     //@State var isFavorite: Bool = false
     var username: String = ""
-    @State var query: String = ""
+    @Binding var query: String
 
     @State private var isTypeOpen: Bool = false
     let typeColors: [String: Color] = [
@@ -117,7 +135,9 @@ struct HeaderView: View {
         "8° Galar": Color("flyingColor"),
         "9° Paldea": Color("poisonColor"),
     ]
-
+    
+    @Binding var selectedFilters: [String]
+    
     var body: some View {
         VStack {
             HStack {
@@ -129,7 +149,7 @@ struct HeaderView: View {
             }
 
             HStack {
-                BusquedaView(text: $query)
+                BusquedaView(query: $query)
                 Button {
 
                 } label: {
@@ -150,10 +170,11 @@ struct HeaderView: View {
                         .padding()
                         .frame(width: 120, height: 40)
                         .background(Color.gray.opacity(0.1))
+                        .foregroundColor(.black)
                         .cornerRadius(8)
                 }
 
-                // Botón para mostrar las opciones de filtro de generación
+//                // Botón para mostrar las opciones de filtro de generación
                 Button(action: {
                     withAnimation {
                         isGenerationOpen.toggle()
@@ -164,23 +185,31 @@ struct HeaderView: View {
                         .padding()
                         .frame(width: 120, height: 40)
                         .background(Color.gray.opacity(0.1))
+                        .foregroundColor(.black)
                         .cornerRadius(8)
                 }
             }
             .padding()
             .offset(x: -60)
 
-            if isTypeOpen {
-                GridView(items: Array(typeColors.keys.sorted()), colors: typeColors) { selected in
-                    isTypeOpen = false
-                }
+            if isGenerationOpen {
+                GridView(
+                    items: Array(generationColors.keys.sorted()),
+                    colors: generationColors,
+                    selectedFilters: $selectedFilters,
+                    isSingleSelection: true // Generación será de selección única
+                )
             }
 
-            if isGenerationOpen {
-                GridView( items: Array(generationColors.keys.sorted()), colors: generationColors) { selected in
-                    isGenerationOpen = false
-                }
+            if isTypeOpen {
+                GridView(
+                    items: Array(typeColors.keys.sorted()),
+                    colors: typeColors,
+                    selectedFilters: $selectedFilters,
+                    isSingleSelection: false // Tipos permiten selección múltiple
+                )
             }
+
         }
         .offset(y: 9)
     }
@@ -189,8 +218,14 @@ struct HeaderView: View {
 struct CardView: View {
     var pokemon: Pokemon
     var username: String
+    
+    // Función para construir el nombre del color
+    private func getTypeColorName(_ type: String?) -> String {
+        guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
+        return type.lowercased() + "Color" // Construye el nombre del color
+    }
+    
     var body: some View {
-
         VStack {
             HStack {
                 Text(pokemon.name)
@@ -213,20 +248,106 @@ struct CardView: View {
                                 RoundedRectangle(cornerRadius: 32)
                                     .stroke(Color.white, lineWidth: 2)
                             )
-                            
+
                     }
                 }
                 ZStack {
                     Image("pokeball_bg")
-                    pokemon.image.resizable().scaledToFit().frame(width: 90, height: 100)
+                    pokemon.image.resizable().scaledToFit().frame(
+                        width: 90, height: 100)
                 }
                 .offset(x: 15, y: 20)
             }
         }
         .padding()
-        .background(.green)
+        .background(Color(getTypeColorName(pokemon.types.first)) )
         .cornerRadius(20)
         .scaledToFit()
+    }
+}
+
+// Vista para una fila de dos cards de Pokémon
+struct PokemonRowView: View {
+    @Binding var query: String
+    @Binding var selectedFilters: [String]
+    var pokemons: [Pokemon]
+    var index: Int
+    var currentUserNickname: String
+
+    // Función para obtener el número de generación
+    private func getGenerationFilter() -> Int {
+        for filter in selectedFilters {
+            if let match = filter.first(where: { $0.isNumber }), let number = Int(String(match)) {
+                return number
+            }
+        }
+        return 0 // Si no hay número en los filtros, devolvemos 0
+    }
+    
+    var body: some View {
+        // (getGenerationFilter() == 0 || pokemons[index].generation == String(getGenerationFilter()))
+        
+        if (query.isEmpty || pokemons[index].name.lowercased().contains(query.lowercased())) &&
+            (selectedFilters.isEmpty || selectedFilters.allSatisfy { type in
+                // Verificamos que todos los filtros seleccionados están presentes en los tipos del Pokémon
+                pokemons[index].types.contains { $0.lowercased() == type.lowercased() }
+            }) {
+                // Si pasa todos los filtros, mostramos la CardView
+                CardView(pokemon: pokemons[index], username: currentUserNickname)
+                    .offset(x: 7)
+        }
+    }
+}
+
+
+
+// Vista principal para mostrar la lista de Pokémon
+struct PokemonListView: View {
+    @Binding var pokemons: [Pokemon]
+    @Binding var pokemon_offset: Int
+    @Binding var pokemon_names: [String]
+    @Binding var query: String
+    @Binding var selectedFilters: [String]
+    var currentUserNickname: String
+    
+    // Función para cargar más Pokémon
+    private func loadMorePokemons() async {
+        pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
+        pokemon_offset = pokemons.count
+    }
+
+    // Función para cargar los Pokémon iniciales
+    private func loadInitialPokemons() async {
+        pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: [], generationFilter: 0)
+        pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
+        pokemon_offset += 10
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack {
+                // Usamos stride para dividir los Pokémon en grupos de dos por cada fila
+                ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
+                    // Llamamos a la vista que maneja cada fila
+                    HStack {
+                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index, currentUserNickname: currentUserNickname)
+                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index + 1, currentUserNickname: currentUserNickname)
+                    }
+                    .padding(0)
+                    Spacer()
+                    .onAppear {
+                        if pokemons[index] == pokemons.dropLast().last {
+                            Task {
+                                await loadMorePokemons()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .task {
+            await loadInitialPokemons()
+        }
     }
 }
 
@@ -282,58 +403,35 @@ struct FooterView: View {
     }
 }
 
+// Vista principal MenuView
 struct MenuView: View {
     @EnvironmentObject var vm: ViewModel
-    @State var view: Int = 1
+    @State var view: Int = 1  //0: BattleView, 1: mainView, 2: profileView
+    @State var query: String = ""
+    @State var selectedFilters: [String] = []
     @State var pokemon_names: [String] = []
     @State var pokemons: [Pokemon] = []
     @State var pokemon_offset: Int = 0
-    let cardNames = ["bulbasaur", "ivysaur", "venusaur", "charmander", "charmeleon", "squirtle", "squirtle", "squirtle", "squirtle"]
     
     var body: some View {
         VStack {
             if view != 2 {
-                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname)
-                ScrollView {
-                    VStack {
-                        ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
-                            HStack {
-                                CardView(pokemon: pokemons[index], username: vm.currentUserNickname)
-                                if index + 1 < pokemons.count {
-                                    CardView(pokemon: pokemons[index + 1], username: vm.currentUserNickname)
-                                } else {
-                                    Spacer()
-                                }
-                            }.padding(0).onAppear {
-                                if pokemons[index] == pokemons.dropLast().last {
-                                    Task {
-                                        pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
-                                        pokemon_offset = pokemons.count
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 2)
-                    }
-                }.task {
-                    pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: "", typeFilter: [], generationFilter: 1)
-                    pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
-                    pokemon_offset += 10
-                }
-                Spacer()
-                FooterView(view: $view)
+                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
+                PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname)
             }
-        }.navigationBarBackButtonHidden(true)
-    }
-    
-    struct MenuView_Previews: PreviewProvider {
-        static var previews: some View {
-            let previewViewModel = ViewModel.instance
-            previewViewModel.currentUserNickname = "Luis"
-            
-            return MenuView()
-                .environmentObject(previewViewModel)
+            Spacer()
+            FooterView(view: $view)
         }
+        .navigationBarBackButtonHidden(true)
+    }
+}
+
+struct MenuView_Previews: PreviewProvider {
+    static var previews: some View {
+        let previewViewModel = ViewModel.instance
+        previewViewModel.currentUserNickname = "Luis"
+
+        return MenuView()
+            .environmentObject(previewViewModel)
     }
 }
