@@ -12,6 +12,7 @@ struct Pokemon: Identifiable, Equatable {
     let image: Image
     let image_shiny: Image
     let evolution_chain_id: Int
+    let moves: [Move]
     //let generation: String
 }
 
@@ -275,7 +276,8 @@ class ViewModel: ObservableObject {
             stats: stats,
             image: image,
             image_shiny: image_shiny,
-            evolution_chain_id: evolution_chain_id
+            evolution_chain_id: evolution_chain_id,
+            moves: moves
             //generation: generation
         )
     }
@@ -551,11 +553,6 @@ class ViewModel: ObservableObject {
     }
 */
     
-    //FrontEnd Pokemon
-    //Para el color del Pokemon
-    func getColor(_ type: String?) -> String {
-        guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
-        return type.lowercased() + "Color" // Construye el nombre del color
-    }
+    
     
 }

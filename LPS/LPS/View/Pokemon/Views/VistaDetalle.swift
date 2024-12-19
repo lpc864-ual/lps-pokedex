@@ -6,11 +6,14 @@ struct VistaDetalle: View {
     @State private var selectedTab: Tab = .about
     @State private var isShiny: Bool = false
     @State private var favorite: Bool = false
-
+    var colorFondo: Color {
+        Color(getColor(pokemon.types.first ?? "default"))
+    }
+    
     var body: some View {
         ZStack {
             // Fondo verde que cubre toda la pantalla
-            Color(viewModel.getColor(pokemon.types.first))
+            Color(colorFondo)
                 .edgesIgnoringSafeArea(.all)
             
             HStack{
@@ -124,7 +127,7 @@ struct VistaDetalle: View {
                 ForEach(pokemon.types, id: \.self) { type in
                     Text(type)
                         .padding(4)
-                        .background(Color(viewModel.getColor(pokemon.types.first)))
+                        .background(Color(colorFondo))
                         .cornerRadius(20)
                         .foregroundColor(.white)
                 }
@@ -136,19 +139,19 @@ struct VistaDetalle: View {
                     title: "About",
                     isSelected: selectedTab == .about,
                     action: { selectedTab = .about },
-                    viewModel: viewModel
+                    pokemon: pokemon
                 )
                 TabButton(
                     title: "Evolutions",
                     isSelected: selectedTab == .evolutions,
                     action: { selectedTab = .evolutions },
-                    viewModel: viewModel
+                    pokemon: pokemon
                 )
                 TabButton(
                     title: "Moves",
                     isSelected: selectedTab == .moves,
                     action: { selectedTab = .moves },
-                    viewModel: viewModel 
+                    pokemon: pokemon
                 )
             }
 
@@ -161,14 +164,16 @@ struct TabButton: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    @ObservedObject var viewModel: ViewModel
-
+    let pokemon: Pokemon
+    var colorFondo: Color {
+        Color(getColor(pokemon.types.first ?? "default"))
+    }
     var body: some View {
         Button(action: action) {
             Text(title)
                 .fontWeight(isSelected ? .bold : .regular)
-                .foregroundColor(Color(viewModel.getColor(pokemon.types.first)))
-                .underline(isSelected, color: viewModel.getColor(pokemon.types.first)))
+                .foregroundColor(Color(colorFondo))
+                .underline(isSelected, color: colorFondo)
                 .padding(.horizontal)
         }
     }
@@ -183,23 +188,29 @@ enum Tab {
 struct TabContent: View {
     @Binding var selectedTab: Tab
     let pokemon: Pokemon
+    var colorFondo: Color {
+        Color(getColor(pokemon.types.first ?? "default"))
+    }
 
     var body: some View {
         VStack {
             switch selectedTab {
             case .about:
-                VistaAbout(pokemon: pokemon, getColor: getColor)
+                VistaAbout(pokemon: pokemon, colorFondo: colorFondo)
             case .evolutions:
-                VistaEvolution(evolutions: pokemon.evolution_chain_id, getColor: getColor, pokemonType: pokemon.types.first ?? "Normal")
+                VistaEvolution(evolutions: pokemon.evolution_chain_id, colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "Normal")
             case .moves:
                 VistaMovimientos(moves: pokemon.moves,
-                                 getColor: getColor, pokemonType: pokemon.types.first ?? "Normal")
+                                 colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "Normal")
             }
         }
     }
 }
 
-
+func getColor(_ type: String?) -> String {
+    guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
+    return type.lowercased() + "Color" // Construye el nombre del color
+}
 
 
 

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct VistaAbout: View {
     var pokemon: Pokemon
-    var getBackgroundColor: (String) -> Color
+    var colorFondo: Color
 
     var body: some View {
         ScrollView{
@@ -57,7 +57,7 @@ struct VistaAbout: View {
                         .font(.headline)
                         .padding(.bottom, 10)
                     
-                    ForEach(pokemon.stats.keys.sorted(), id: \.self) { statName in
+                    /*ForEach(pokemon.stats.keys.sorted(), id: \.self) { statName in
                         HStack {
                             Text(statName)
                                 .frame(width: 50, alignment: .leading)
@@ -69,7 +69,7 @@ struct VistaAbout: View {
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
-                    }
+                    }*/
                 }
             }
             .padding()

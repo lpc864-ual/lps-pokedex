@@ -2,7 +2,7 @@ import SwiftUI
 
 struct VistaEvolution: View {
     var evolutions: Int
-    var getBackgroundColor: (String) -> Color
+    var colorFondo: Color
     var pokemonType: String
     
     var body: some View {

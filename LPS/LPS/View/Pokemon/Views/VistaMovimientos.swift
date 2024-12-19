@@ -2,7 +2,7 @@ import SwiftUI
 
 struct VistaMovimientos: View {
     var moves: [Move]
-    var getBackgroundColor: (String) -> Color // Método para obtener el color
+    var colorFondo: Color
     var pokemonType: String // El tipo del Pokémon
 
     var body: some View {
@@ -16,7 +16,7 @@ struct VistaMovimientos: View {
                             Text(move.name)
                                 .font(.headline)
                                 .bold()
-                                .foregroundColor(getBackgroundColor(pokemonType))
+                                .foregroundColor(colorFondo)
                             
                             Spacer()
                             
@@ -42,7 +42,7 @@ struct VistaMovimientos: View {
                     .padding()
                     .background(
                         RoundedRectangle(cornerRadius: 15)
-                            .stroke(getBackgroundColor(pokemonType).opacity(0.5), lineWidth: 1.5)
+                            .stroke(colorFondo.opacity(0.5), lineWidth: 1.5)
                     )
                     .padding(.horizontal)
                 }
