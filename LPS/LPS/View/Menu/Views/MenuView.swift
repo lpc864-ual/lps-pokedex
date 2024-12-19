@@ -216,6 +216,7 @@ struct HeaderView: View {
 }
 
 struct CardView: View {
+    
     var pokemon: Pokemon
     var username: String
     
@@ -266,7 +267,6 @@ struct CardView: View {
     }
 }
 
-// Vista para una fila de dos cards de Pokémon
 struct PokemonRowView: View {
     @Binding var query: String
     @Binding var selectedFilters: [String]
@@ -283,22 +283,22 @@ struct PokemonRowView: View {
         }
         return 0 // Si no hay número en los filtros, devolvemos 0
     }
-    
+
     var body: some View {
-        // (getGenerationFilter() == 0 || pokemons[index].generation == String(getGenerationFilter()))
-        
+        // Filtrado de Pokémon según query y filtros
         if (query.isEmpty || pokemons[index].name.lowercased().contains(query.lowercased())) &&
-            (selectedFilters.isEmpty || selectedFilters.allSatisfy { type in
-                // Verificamos que todos los filtros seleccionados están presentes en los tipos del Pokémon
-                pokemons[index].types.contains { $0.lowercased() == type.lowercased() }
-            }) {
-                // Si pasa todos los filtros, mostramos la CardView
-                CardView(pokemon: pokemons[index], username: currentUserNickname)
-                    .offset(x: 7)
+            (selectedFilters.isEmpty || selectedFilters.allSatisfy { type in pokemons[index].types.contains { $0.lowercased() == type.lowercased() } }) {
+            // Mostrar la tarjeta si pasa los filtros
+            NavigationLink(
+                destination: VistaDetalle(pokemon: pokemons[index]),
+                label: {
+                    CardView(pokemon: pokemons[index], username: currentUserNickname)
+                        .offset(x: 7)
+                }
+            )
         }
     }
 }
-
 
 
 // Vista principal para mostrar la lista de Pokémon

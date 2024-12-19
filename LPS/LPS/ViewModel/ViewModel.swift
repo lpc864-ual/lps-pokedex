@@ -550,4 +550,12 @@ class ViewModel: ObservableObject {
         }
     }
 */
+    
+    //FrontEnd Pokemon
+    //Para el color del Pokemon
+    func getColor(_ type: String?) -> String {
+        guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
+        return type.lowercased() + "Color" // Construye el nombre del color
+    }
+    
 }
