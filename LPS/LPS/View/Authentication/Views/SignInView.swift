@@ -98,6 +98,7 @@ struct SignInView: View {
                         let loginResult = ViewModel.instance.loginUser(username: username, password: password)
                         if loginResult == "Inicio de sesión exitoso." {
                             // Si el inicio de sesión es exitoso, navega a la siguiente pantalla
+                            vm.currentUserNickname = username
                             self.isNavigationDashboard = true
                         } else {
                             // Si el inicio de sesión falla, mostrar el mensaje de error

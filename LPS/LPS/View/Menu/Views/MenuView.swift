@@ -299,8 +299,6 @@ struct PokemonRowView: View {
     }
 }
 
-
-
 // Vista principal para mostrar la lista de Pokémon
 struct PokemonListView: View {
     @Binding var pokemons: [Pokemon]
@@ -348,6 +346,52 @@ struct PokemonListView: View {
         .task {
             await loadInitialPokemons()
         }
+    }
+}
+
+struct ProfileView: View {
+    @Binding var view: Int
+    var username: String = ""
+    var body: some View {
+       
+            // Contenedor principal
+            VStack(spacing: 40) {
+                Spacer()
+                
+                // Avatar
+                Image("avatarImage") // Usa una imagen en tus Assets
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle()
+                            .stroke(Color.red, lineWidth: 2) // Borde circular
+                    )
+                    .offset(y: 25)
+                
+                // Texto centrado
+                Text(username)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.black)
+                
+                // Botón de salida
+               
+                    Button(action: {
+                        view = 3
+                    }) {
+                        Image("exit") // Icono del sistema
+                            .resizable()
+                            .foregroundColor(.white)
+                            .frame(width: 50, height: 50)
+                            .background(Circle().fill(Color.red))
+                            .padding()
+                    }
+                
+                
+                Spacer()
+            }
+        
     }
 }
 
@@ -406,7 +450,7 @@ struct FooterView: View {
 // Vista principal MenuView
 struct MenuView: View {
     @EnvironmentObject var vm: ViewModel
-    @State var view: Int = 1  //0: BattleView, 1: mainView, 2: profileView
+    @State var view: Int = 1  //0: BattleView, 1: mainView, 2: profileView; 3: exit
     @State var query: String = ""
     @State var selectedFilters: [String] = []
     @State var pokemon_names: [String] = []
@@ -414,15 +458,28 @@ struct MenuView: View {
     @State var pokemon_offset: Int = 0
     
     var body: some View {
-        VStack {
-            if view != 2 {
-                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
-                PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname)
+            NavigationView {
+                   if view != 3 {
+                       VStack {
+                           if view != 2 {
+                               HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
+                               PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname)
+                           } else {
+                               ProfileView(view: $view, username: vm.currentUserNickname)
+                           }
+                           Spacer()
+                           FooterView(view: $view)
+                       }
+                       .navigationBarBackButtonHidden(true)
+                   } else {
+                       // Eliminamos el padding implícito con ZStack
+                        ZStack {
+                            SignInView()
+                                .edgesIgnoringSafeArea(.all) // Elimina cualquier margen o padding no deseado
+                        }
+                   }
             }
-            Spacer()
-            FooterView(view: $view)
-        }
-        .navigationBarBackButtonHidden(true)
+            .navigationBarBackButtonHidden(true)
     }
 }
 
