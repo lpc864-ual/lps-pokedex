@@ -100,6 +100,7 @@ struct HeaderView: View {
     //@State var isFavorite: Bool = false
     var username: String = ""
     @Binding var query: String
+    @Binding var isContinuar: Bool
 
     @State private var isTypeOpen: Bool = false
     let typeColors: [String: Color] = [
@@ -141,75 +142,76 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                Text(view == 0 ? "Team Select" : "Hi! " + username + " 👋")
+                Text(view == 0 ? (isContinuar ? "Team Preview" : "Team Select") : "Hi! " + username + " 👋")
                     .font(.system(size: 34))
                     .fontWeight(.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .offset(x: 20)
             }
+            
+            if (!isContinuar) {
+                HStack {
+                    BusquedaView(query: $query)
+                    Button {
 
-            HStack {
-                BusquedaView(query: $query)
-                Button {
-
-                } label: {
-                    Image(systemName: 1 == 1 ? "heart" : "heart.fill")
-                        .foregroundColor(.red)
-                        .font(.system(size: 30))
-                }
-            }
-            HStack(spacing: 12) {
-                // Botón para mostrar las opciones de filtro de tipo
-                Button(action: {
-                    withAnimation {
-                        isTypeOpen.toggle()
-                        isGenerationOpen = false
+                    } label: {
+                        Image(systemName: 1 == 1 ? "heart" : "heart.fill")
+                            .foregroundColor(.red)
+                            .font(.system(size: 30))
                     }
-                }) {
-                    Text("Type")
-                        .padding()
-                        .frame(width: 120, height: 40)
-                        .background(Color.gray.opacity(0.1))
-                        .foregroundColor(.black)
-                        .cornerRadius(8)
                 }
-
-//                // Botón para mostrar las opciones de filtro de generación
-                Button(action: {
-                    withAnimation {
-                        isGenerationOpen.toggle()
-                        isTypeOpen = false
+                HStack(spacing: 12) {
+                    // Botón para mostrar las opciones de filtro de tipo
+                    Button(action: {
+                        withAnimation {
+                            isTypeOpen.toggle()
+                            isGenerationOpen = false
+                        }
+                    }) {
+                        Text("Type")
+                            .padding()
+                            .frame(width: 120, height: 40)
+                            .background(Color.gray.opacity(0.1))
+                            .foregroundColor(.black)
+                            .cornerRadius(8)
                     }
-                }) {
-                    Text("Generation")
-                        .padding()
-                        .frame(width: 120, height: 40)
-                        .background(Color.gray.opacity(0.1))
-                        .foregroundColor(.black)
-                        .cornerRadius(8)
+
+    //                // Botón para mostrar las opciones de filtro de generación
+                    Button(action: {
+                        withAnimation {
+                            isGenerationOpen.toggle()
+                            isTypeOpen = false
+                        }
+                    }) {
+                        Text("Generation")
+                            .padding()
+                            .frame(width: 120, height: 40)
+                            .background(Color.gray.opacity(0.1))
+                            .foregroundColor(.black)
+                            .cornerRadius(8)
+                    }
+                }
+                .padding()
+                .offset(x: -60)
+
+                if isGenerationOpen {
+                    GridView(
+                        items: Array(generationColors.keys.sorted()),
+                        colors: generationColors,
+                        selectedFilters: $selectedFilters,
+                        isSingleSelection: true // Generación será de selección única
+                    )
+                }
+
+                if isTypeOpen {
+                    GridView(
+                        items: Array(typeColors.keys.sorted()),
+                        colors: typeColors,
+                        selectedFilters: $selectedFilters,
+                        isSingleSelection: false // Tipos permiten selección múltiple
+                    )
                 }
             }
-            .padding()
-            .offset(x: -60)
-
-            if isGenerationOpen {
-                GridView(
-                    items: Array(generationColors.keys.sorted()),
-                    colors: generationColors,
-                    selectedFilters: $selectedFilters,
-                    isSingleSelection: true // Generación será de selección única
-                )
-            }
-
-            if isTypeOpen {
-                GridView(
-                    items: Array(typeColors.keys.sorted()),
-                    colors: typeColors,
-                    selectedFilters: $selectedFilters,
-                    isSingleSelection: false // Tipos permiten selección múltiple
-                )
-            }
-
         }
         .offset(y: 9)
     }
@@ -263,6 +265,7 @@ struct CardView: View {
                         //BOTON DE AGREGAR POKEMON
                         Button(action: {
                             if (pokemon_images.count != 3) {
+                                pokemon_battle.append(pokemon)
                                 pokemon_images.append(pokemon.image)
                             }
                         }){
@@ -282,6 +285,7 @@ struct CardView: View {
     }
 }
 
+//GUILLERMO: ENCARGADO DE TERMINARLO Y DEJARLO COMO EL FIGMA
 struct CardBattleView: View {
     var pokemon: Pokemon
     var username: String
@@ -330,7 +334,6 @@ struct CardBattleView: View {
                         //BOTON DE AGREGAR POKEMON
                         Button(action: {
                             if (pokemon_images.count != 3) {
-                                pokemon_battle.append(pokemon)
                                 pokemon_images.append(pokemon.image)
                             }
                         }){
@@ -444,8 +447,8 @@ struct PokemonListView: View {
 struct BattleFooterView: View {
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
-    @State var isContinuar: Bool = false // Propiedad de estado
-    @Binding var isEmpezar: Bool // Propiedad de estado
+    @Binding var isContinuar: Bool // Propiedad de estado
+    //@Binding var isEmpezar: Bool // Propiedad de estado
     
     var body: some View {
         VStack {
@@ -487,15 +490,12 @@ struct BattleFooterView: View {
                                     .frame(width: 40, height: 40)
                             }
                             
-                            // Botón con la imagen "start"
-                            Button(action: {
-                                // Acción para el botón "start"
-                                print("Start button tapped")
-                            }) {
+                            // GUILLERMO: CORREGIR FALLO AL NAVEGAR AL BATTLEVIEW (PETA)
+                            NavigationLink(destination: BattleView()) {
                                 Image("start")
                                     .resizable()
                                     .frame(width: 40, height: 40)
-                            }
+                                }
                         }
                     }
                 }
@@ -576,31 +576,34 @@ struct MenuView: View {
     @State var pokemon_battle: [Pokemon] = []
     @State var pokemon_images: [Image] = []
     
-    @State var isEmpezar: Bool = false // Propiedad de estado
+    @State var isContinuar: Bool = false
     
     var body: some View {
-        VStack {
-            if view != 2 {
-                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
-                if (!isEmpezar) {
-                    PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                } else {
-                    ForEach(pokemon_battle, id: \.id) { pokemon in
-                        CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+        NavigationView {
+            VStack {
+                if view != 2 {
+                    HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
+                    if (!isContinuar) {
+                        PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                    } else {
+                        ForEach(pokemon_battle, id: \.id) { pokemon in
+                            CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                                 .offset(x: 7)
+                        }
+                    }
+                    
+                    if (view == 0) {
+                        BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar)
                     }
                 }
-                
-                if (view == 0) {
-                    BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isEmpezar: $isEmpezar)
-                }
+                Spacer()
+                FooterView(view: $view)
             }
-            Spacer()
-            FooterView(view: $view)
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationBarBackButtonHidden(true)
     }
 }
+
 
 struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
