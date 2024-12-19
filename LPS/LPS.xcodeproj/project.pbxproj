@@ -24,9 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		35E2DA942CE3B5E3008A5986 /* LPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LPS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		35E2DAA42CE3B5E5008A5986 /* LPSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LPSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		35E2DAAE2CE3B5E5008A5986 /* LPSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LPSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		35E2DA942CE3B5E3008A5986 /* LPS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = LPS.app; path = "/Users/Aula03/Documents/lps-pokedex/LPS/build/Debug-iphoneos/LPS.app"; sourceTree = "<absolute>"; };
+		35E2DAA42CE3B5E5008A5986 /* LPSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = LPSTests.xctest; path = "/Users/Aula03/Documents/lps-pokedex/LPS/build/Debug-iphoneos/LPS.app/PlugIns/LPSTests.xctest"; sourceTree = "<absolute>"; };
+		35E2DAAE2CE3B5E5008A5986 /* LPSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = LPSUITests.xctest; path = "/Users/Aula03/Documents/lps-pokedex/LPS/build/Debug-iphoneos/LPSUITests-Runner.app/PlugIns/LPSUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -78,18 +78,7 @@
 				35E2DA962CE3B5E3008A5986 /* LPS */,
 				35E2DAA72CE3B5E5008A5986 /* LPSTests */,
 				35E2DAB12CE3B5E5008A5986 /* LPSUITests */,
-				35E2DA952CE3B5E3008A5986 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		35E2DA952CE3B5E3008A5986 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				35E2DA942CE3B5E3008A5986 /* LPS.app */,
-				35E2DAA42CE3B5E5008A5986 /* LPSTests.xctest */,
-				35E2DAAE2CE3B5E5008A5986 /* LPSUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,7 +187,7 @@
 			packageReferences = (
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 35E2DA952CE3B5E3008A5986 /* Products */;
+			productRefGroup = 35E2DA8B2CE3B5E3008A5986;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
