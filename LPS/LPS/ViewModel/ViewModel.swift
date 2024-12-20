@@ -12,6 +12,7 @@ struct Pokemon: Identifiable, Equatable {
     let image: Image
     let image_shiny: Image
     let evolution_chain_id: Int
+    let moves: [Move]
     //let generation: String
 }
 
@@ -275,7 +276,8 @@ class ViewModel: ObservableObject {
             stats: stats,
             image: image,
             image_shiny: image_shiny,
-            evolution_chain_id: evolution_chain_id
+            evolution_chain_id: evolution_chain_id,
+            moves: moves
             //generation: generation
         )
     }
