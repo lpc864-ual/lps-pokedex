@@ -5,27 +5,43 @@
 //  Created by Aula03 on 26/11/24.
 //
 
+import UIKit
 import SwiftUI
 
+extension UIDevice {
+    static func setOrientation(_ orientation: UIInterfaceOrientation) {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
+        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation == .landscapeRight ? .landscapeRight : .landscapeLeft))
+    }
+}
+
 struct BattleView: View {
-    @State private var rivalHP: CGFloat = 500 // Vida actual del rival
-    private let rivalTotalHP: CGFloat = 1000   // Vida total del rival
-    
-    @State private var playerHP: CGFloat = 500 // Vida actual del jugador
-    private let playerTotalHP: CGFloat = 1000   // Vida total del jugador
+    @State private var rivalHP: CGFloat = 1000
+    private let rivalTotalHP: CGFloat = 1000
+    @State private var playerHP: CGFloat = 1000
+    private let playerTotalHP: CGFloat = 1000
+    @State private var showLeaveAlert: Bool = false
+    @State private var combatText: String = "The battle begins!"
+    @State private var isPlayerTurn: Bool = true
+    @State private var currentPhase: Int = 1
+    @State private var isBattleActive: Bool = true
 
     var body: some View {
         ZStack {
+            // Fondo negro para los laterales en modo horizontal
+            Color.black
+                .edgesIgnoringSafeArea(.all)
+
             // Imagen de fondo
             Image("battleBackground")
                 .resizable()
                 .scaledToFill()
 
-            VStack {
-                // Vida rival (arriba izquierda)
-                HStack {
-                    VStack(alignment: .leading) {
-                        // Fondo blanco para el cuadro
+            VStack(alignment: .leading) {
+                
+                HStack(){
+                    // Vida rival (parte superior izquierda)
+                    VStack(alignment: .leading){
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white)
                             .frame(width: 250, height: 80)
@@ -36,19 +52,15 @@ struct BattleView: View {
                                         .foregroundColor(.black)
 
                                     ZStack(alignment: .leading) {
-                                        // Fondo de la barra
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color.green.opacity(0.3))
                                             .frame(width: 200, height: 10)
-
-                                        // Barra de vida
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color.green)
                                             .frame(width: CGFloat(rivalHP / rivalTotalHP) * 200, height: 10)
-                                    }
+                                        }
 
                                     HStack {
-                                        
                                         RoundedRectangle(cornerRadius: 5)
                                             .fill(Color.gray.opacity(0.8))
                                             .frame(width: 30, height: 15)
@@ -58,24 +70,72 @@ struct BattleView: View {
                                                     .foregroundColor(.white)
                                             )
                                         
-                                        Text("\(Int(rivalHP))/\(Int(rivalTotalHP))")
-                                            .font(.caption)
-                                            .foregroundColor(.black)
+                                        if (rivalHP >= 0){
+                                            Text("\(Int(rivalHP))/\(Int(playerTotalHP))")
+                                                .font(.caption)
+                                                .foregroundColor(.black)
+                                        }else{
+                                            Text("\(Int(0))/\(Int(playerTotalHP))")
+                                                .font(.caption)
+                                                .foregroundColor(.black)
+                                        }
                                     }
                                 }
                                 .padding(.horizontal, 10)
                             )
+                        
+                        // Botón de salir
+                        Button(action: {
+                            showLeaveAlert = true
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.left")
+                                    .font(.system(size: 25, weight: .bold))
+                                Text("LEAVE")
+                                    .font(.headline)
+                            }
+                            .frame(width: 100, height: 10.0)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(10)
+                        }
+                        
+                        Spacer()
                     }
-                    .padding()
+                    .padding(.top, 40.0)
+                    .padding(.leading, 10.0)
+                    
                     Spacer()
+                    
+                    VStack{
+                        Spacer()
+                        HStack{
+                            
+                            //AQUI VIENEN LOS SPRITES DEL EQUIPO RIVAL
+                            Image("bulbasur")
+                            Image("bulbasur")
+                            Image("bulbasur")
+                        
+                        }
+                    }.padding(.trailing, 10.0)
+                    
                 }
-                Spacer()
-
-                // Vida jugador (abajo derecha)
+        
                 HStack {
+                    
+                    HStack{
+                        //AQUI VIENEN LOS SPRITES DE LOS POKES ELEGIDOS POR EL JUGADOR
+                        Image("wartortleBack")
+                        Image("wartortleBack")
+                        Image("wartortleBack")
+                    }
+                    .padding(.leading)
+                    
                     Spacer()
+
+                    // Vida jugador
                     VStack(alignment: .trailing) {
-                        // Fondo blanco para el cuadro
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white)
                             .frame(width: 250, height: 80)
@@ -86,21 +146,25 @@ struct BattleView: View {
                                         .foregroundColor(.black)
 
                                     ZStack(alignment: .leading) {
-                                        // Fondo de la barra
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color.green.opacity(0.3))
                                             .frame(width: 200, height: 10)
-
-                                        // Barra de vida
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color.green)
                                             .frame(width: CGFloat(playerHP / playerTotalHP) * 200, height: 10)
                                     }
 
                                     HStack {
-                                        Text("\(Int(playerHP))/\(Int(playerTotalHP))")
-                                            .font(.caption)
-                                            .foregroundColor(.black)
+                                        if (playerHP >= 0){
+                                            Text("\(Int(playerHP))/\(Int(playerTotalHP))")
+                                                .font(.caption)
+                                                .foregroundColor(.black)
+                                        }else{
+                                            Text("\(Int(0))/\(Int(playerTotalHP))")
+                                                .font(.caption)
+                                                .foregroundColor(.black)
+                                        }
+
 
                                         RoundedRectangle(cornerRadius: 5)
                                             .fill(Color.gray.opacity(0.8))
@@ -115,37 +179,85 @@ struct BattleView: View {
                                 .padding(.horizontal, 10)
                             )
                     }
-                    .padding()
+                    .padding(.trailing, 10.0)
                 }
-            }
-            
-            // Botón de salir (esquina inferior izquierda)
-                        VStack {
-                            Spacer()
-                            HStack {
-                                Button(action: {
-                                    print("Salir de la pelea") // Aquí puedes reemplazar la acción con navegación o cierre
-                                }) {
-                                    HStack {
-                                        Image(systemName: "arrow.left")
-                                            .font(.system(size: 20, weight: .bold))
-                                        Text("LEAVE")
-                                            .font(.headline)
-                                    }
+
+                // Texto del combate con "Tap to continue"
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.black.opacity(0.7))
+                    .frame(height: 100)
+                    .overlay(
+                        VStack() {
+                                Text(combatText)
+                                    .font(.body)
                                     .foregroundColor(.white)
                                     .padding()
-                                    .background(Color(hue: 0.033, saturation: 1.0, brightness: 1.0))
-                                    .cornerRadius(10)
-                                }
-                                .padding(.leading, 10) // Separación del borde izquierdo
-                                Spacer()
-                            }
+                            
+                                Text("Tap to continue")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                    .padding()
+                                
                         }
-                        .padding(.bottom, 10.0)
+                    )
+                    .onTapGesture {
+                        if isBattleActive {
+                            performBattlePhase()
+                        }
+                    }
+            }
+            
+            .alert("Leave Battle", isPresented: $showLeaveAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Confirm", role: .destructive) {
+                    print("El usuario ha confirmado salir de la batalla.")
+                }
+            } message: {
+                Text("Are you sure you want to leave the battle?")
+            }
+        }
+    }
+
+    // Realiza una fase de combate (ataque de jugador o rival)
+    private func performBattlePhase() {
+        guard isBattleActive else { return }
+        
+        //AQUI SE DEBE TOMAR LOS VALORES DE AMBOS EQUIPOS PARA EL DAÑO Y LA PROBABILIDAD
+        
+        let damage = Int.random(in: 0...100) <= 85 ? 90 : 0 // 85% de probabilidad de acierto
+        if currentPhase == 1 {
+            if damage > 0 {
+                rivalHP -= CGFloat(damage)
+                combatText = "Your team attacks and deals \(damage) damage!"
+            } else {
+                combatText = "Your team attacks but misses!"
+            }
+            currentPhase = 2
+        } else {
+            if damage > 0 {
+                playerHP -= CGFloat(damage)
+                combatText = "The rival team attacks and deals \(damage) damage!"
+            } else {
+                combatText = "The rival team attacks but misses!"
+            }
+            currentPhase = 1
+        }
+        
+        // Verifica si alguien ha ganado
+        if rivalHP <= 0 {
+            combatText = "You won the battle!"
+            isBattleActive = false
+        } else if playerHP <= 0 {
+            combatText = "You lost the battle!"
+            isBattleActive = false
         }
     }
 }
 
-#Preview {
-    BattleView()
+struct BattleView_Previews: PreviewProvider {
+    static var previews: some View {
+        BattleView()
+    }
 }
+
+
