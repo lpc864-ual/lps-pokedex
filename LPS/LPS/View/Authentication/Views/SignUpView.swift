@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SignUpView: View {
-    // @StateObject private var viewModel = SignInViewModel()
+    @EnvironmentObject var vm: ViewModel
     @State private var username: String = ""
     @State private var password: String = ""
     @State private var showAlert: Bool = false
@@ -125,6 +125,7 @@ struct SignUpView: View {
                             // Verificamos que el username no este usado desde el backend
                             let loginResult = ViewModel.instance.registerUser(username: username, password: password)
                             if loginResult == "Registro exitoso." {
+                                vm.currentUserNickname = username
                                 self.isNavigationDashboard = true
                             } else {
                                 alertMessage = loginResult
