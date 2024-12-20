@@ -335,16 +335,16 @@ struct PokemonListView: View {
                     }
                     .padding(0)
                     Spacer()
-                    .onAppear {
-                        if pokemons[index] == pokemons.dropLast().last {
-                            Task {
-                                await loadMorePokemons()
+                        .onAppear {
+                            if pokemons[index] == pokemons.dropLast().last {
+                                Task {
+                                    await loadMorePokemons()
+                                }
                             }
                         }
                     }
                 }
             }
-        }
         .task {
             await loadInitialPokemons()
         }
@@ -414,15 +414,17 @@ struct MenuView: View {
     @State var pokemon_offset: Int = 0
     
     var body: some View {
-        VStack {
-            if view != 2 {
-                HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
-                PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname)
+        NavigationView{
+            VStack {
+                if view != 2 {
+                    HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, selectedFilters: $selectedFilters)
+                    PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname)
+                }
+                Spacer()
+                FooterView(view: $view)
             }
-            Spacer()
-            FooterView(view: $view)
+            .navigationBarBackButtonHidden(true)
         }
-        .navigationBarBackButtonHidden(true)
     }
 }
 

@@ -2,7 +2,8 @@ import SwiftUI
 
 struct VistaDetalle: View {
     let pokemon : Pokemon
-    @EnvironmentObject var viewModel: ViewModel
+    //@Environment var viewModel : ViewModel
+    @Environment(\.presentationMode) var presentationMode
     @State private var selectedTab: Tab = .about
     @State private var isShiny: Bool = false
     @State private var favorite: Bool = false
@@ -24,8 +25,9 @@ struct VistaDetalle: View {
                     .scaledToFit()
                     .frame(height: 250)
                     .shadow(color: .black.opacity(0.8), radius: 10, x: 0, y: 5)
+                    .opacity(0.2)
             }
-            .zIndex(-1)
+            .zIndex(0)
             .padding(.top, -440)
           
             VStack(spacing: 0) {
@@ -37,13 +39,14 @@ struct VistaDetalle: View {
                     
                     //Flecha de volver al menú
                     Button(action: {
+                        presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "arrow.left")
                             .foregroundColor(.white)
                             .font(.system(size: 25))
                     }
                     //Nombre
-                    Text(pokemon.name)
+                    Text(pokemon.name.capitalized)
                         .font(.title)
                         .bold()
                         .foregroundColor(.white)
@@ -85,7 +88,7 @@ struct VistaDetalle: View {
                         .padding(.top, 240)
                     
                     // Contenido de las tabs dinámicas
-                    TabContent(selectedTab: $selectedTab, pokemon: pokemon)
+                    TabContent(/*viewModel: viewModel,*/ selectedTab: $selectedTab, pokemon: pokemon)
                         .padding(.top, 380)
                 }
                 .zIndex(1) 
@@ -103,10 +106,10 @@ struct VistaDetalle: View {
                 }
                 .offset(x: -40)
 
-                (isShiny ? pokemon.image : pokemon.image_shiny)
+                (isShiny ? pokemon.image_shiny : pokemon.image)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 210)
+                    .frame(height: 250)
                     .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
 
                 Button(action: {})
@@ -119,15 +122,15 @@ struct VistaDetalle: View {
                 }
                 .offset(x: 40)
             }
-            .offset(y: -160)
+            .offset(y: -180)
             .zIndex(3) // Sobre todo el contenido
             
             HStack {
                 //Muestra el tipo del pokemon
                 ForEach(pokemon.types, id: \.self) { type in
-                    Text(type)
+                    Text(type.capitalized)
                         .padding(4)
-                        .background(Color(colorFondo))
+                        .background(Color(getColor(type)))
                         .cornerRadius(20)
                         .foregroundColor(.white)
                 }
@@ -155,7 +158,7 @@ struct VistaDetalle: View {
                 )
             }
 
-        }
+        }.navigationBarBackButtonHidden(true)
     }
 }
 
@@ -186,6 +189,7 @@ enum Tab {
 
 // Contenido dinámico de las tabs
 struct TabContent: View {
+    //var viewModel : ViewModel
     @Binding var selectedTab: Tab
     let pokemon: Pokemon
     var colorFondo: Color {
@@ -198,7 +202,7 @@ struct TabContent: View {
             case .about:
                 VistaAbout(pokemon: pokemon, colorFondo: colorFondo)
             case .evolutions:
-                VistaEvolution(evolutions: pokemon.evolution_chain_id, colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "Normal")
+                VistaEvolution(/*viewmodel: viewModel,*/ evolutions: pokemon.evolution_chain_id, colorFondo: colorFondo)
             case .moves:
                 VistaMovimientos(moves: pokemon.moves,
                                  colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "Normal")
