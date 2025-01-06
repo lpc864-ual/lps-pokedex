@@ -9,12 +9,12 @@ import SwiftUI
 
 struct BusquedaView: View {
     @Binding var query: String
-
+    
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(Color.gray)
-
+            
             ZStack(alignment: .leading) {
                 if query.isEmpty {
                     Text("Buscar...")
@@ -23,13 +23,13 @@ struct BusquedaView: View {
                 TextField("", text: $query)
                     .frame(height: 8)
             }
-
+            
         }
         .padding()
         .frame(width: 325, height: 40)
         .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.black.opacity(0.5), lineWidth: 2)
         )
-
+        
     }
 }
 
@@ -39,10 +39,10 @@ struct GridView: View {
     let colors: [String: Color]
     @Binding var selectedFilters: [String]
     let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
-
+    
     var body: some View {
         let groupedItems = items.chunked(into: 3)
-
+        
         VStack {
             ForEach(groupedItems, id: \.self) { row in
                 HStack {
@@ -73,7 +73,7 @@ struct GridView: View {
                                 .cornerRadius(8)
                                 .opacity(selectedFilters.contains(item.lowercased()) ? 1 : 0.2)
                         }
-
+                        
                     }
                 }
                 .padding(.horizontal)
@@ -101,7 +101,7 @@ struct HeaderView: View {
     var username: String = ""
     @Binding var query: String
     @Binding var isContinuar: Bool
-
+    
     @State private var isTypeOpen: Bool = false
     let typeColors: [String: Color] = [
         "Normal": Color("normalColor"),
@@ -123,7 +123,7 @@ struct HeaderView: View {
         "Fairy": Color("fairyColor"),
         "Psychic": Color("psychicColor"),
     ]
-
+    
     @State private var isGenerationOpen: Bool = false
     let generationColors: [String: Color] = [
         "1° Kanto": Color("normalColor"),
@@ -153,7 +153,7 @@ struct HeaderView: View {
                 HStack {
                     BusquedaView(query: $query)
                     Button {
-
+                        
                     } label: {
                         Image(systemName: 1 == 1 ? "heart" : "heart.fill")
                             .foregroundColor(.red)
@@ -175,8 +175,8 @@ struct HeaderView: View {
                             .foregroundColor(.black)
                             .cornerRadius(8)
                     }
-
-    //                // Botón para mostrar las opciones de filtro de generación
+                    
+                    //                // Botón para mostrar las opciones de filtro de generación
                     Button(action: {
                         withAnimation {
                             isGenerationOpen.toggle()
@@ -193,7 +193,7 @@ struct HeaderView: View {
                 }
                 .padding()
                 .offset(x: -60)
-
+                
                 if isGenerationOpen {
                     GridView(
                         items: Array(generationColors.keys.sorted()),
@@ -202,7 +202,7 @@ struct HeaderView: View {
                         isSingleSelection: true // Generación será de selección única
                     )
                 }
-
+                
                 if isTypeOpen {
                     GridView(
                         items: Array(typeColors.keys.sorted()),
@@ -241,7 +241,7 @@ struct CardView: View {
                 Text("#" + String(format: "%04d", pokemon.id))
                     .foregroundStyle(.black.opacity(0.4))
             }
-
+            
             HStack {
                 VStack {
                     ForEach(pokemon.types, id: \.self) { type in
@@ -250,11 +250,15 @@ struct CardView: View {
                             .font(.system(size: 12))
                             .fontWeight(.medium)
                             .foregroundStyle(.white)
+                            .background(
+                                RoundedRectangle(cornerRadius: 32)
+                                    .fill(Color(getTypeColorName(type)))
+                            )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 32)
                                     .stroke(Color.white, lineWidth: 2)
                             )
-
+                            .clipShape(RoundedRectangle(cornerRadius: 32))
                     }
                 }
                 ZStack {
@@ -310,7 +314,7 @@ struct CardBattleView: View {
                 Text("#" + String(format: "%04d", pokemon.id))
                     .foregroundStyle(.black.opacity(0.4))
             }
-
+            
             HStack {
                 VStack {
                     ForEach(pokemon.types, id: \.self) { type in
@@ -319,11 +323,15 @@ struct CardBattleView: View {
                             .font(.system(size: 12))
                             .fontWeight(.medium)
                             .foregroundStyle(.white)
+                            .background(
+                                RoundedRectangle(cornerRadius: 32)
+                                    .fill(Color(getTypeColorName(type)))
+                            )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 32)
                                     .stroke(Color.white, lineWidth: 2)
                             )
-
+                            .clipShape(RoundedRectangle(cornerRadius: 32))
                     }
                 }
                 ZStack {
@@ -347,7 +355,7 @@ struct CardBattleView: View {
             }
         }
         .padding()
-        .background(Color(getTypeColorName(pokemon.types.first)) )
+        .background(Color(getTypeColorName(pokemon.types.first)))
         .cornerRadius(20)
         .scaledToFit()
     }
@@ -363,7 +371,7 @@ struct PokemonRowView: View {
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
-
+    
     // Función para obtener el número de generación
     private func getGenerationFilter() -> Int {
         for filter in selectedFilters {
@@ -382,9 +390,9 @@ struct PokemonRowView: View {
                 // Verificamos que todos los filtros seleccionados están presentes en los tipos del Pokémon
                 pokemons[index].types.contains { $0.lowercased() == type.lowercased() }
             }) {
-                // Si pasa todos los filtros, mostramos la CardView
+            // Si pasa todos los filtros, mostramos la CardView
             CardView(pokemon: pokemons[index], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                    .offset(x: 7)
+                .offset(x: 7)
         }
     }
 }
@@ -406,28 +414,29 @@ struct PokemonListView: View {
         pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
         pokemon_offset = pokemons.count
     }
-
+    
     // Función para cargar los Pokémon iniciales
     private func loadInitialPokemons() async {
         pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: [], generationFilter: 0)
         pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
         pokemon_offset += 10
     }
-
+    
     var body: some View {
         ScrollView {
-            VStack {
-                // Usamos stride para dividir los Pokémon en grupos de dos por cada fila
+            LazyVStack { // Cambiar a LazyVStack para una carga más eficiente
+                // Dividimos los Pokémon en grupos de dos por cada fila
                 ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
-                    // Llamamos a la vista que maneja cada fila
                     HStack {
-                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle,  pokemon_images: $pokemon_images)
-                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index + 1, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        if index + 1 < pokemons.count {
+                            PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index + 1, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        }
                     }
                     .padding(0)
-                    Spacer()
                     .onAppear {
-                        if pokemons[index] == pokemons.dropLast().last {
+                        // Si el usuario ha llegado al final del contenido actual, carga más Pokémon
+                        if index == pokemons.count - 2 { // Detecta la penúltima fila
                             Task {
                                 await loadMorePokemons()
                             }
@@ -440,50 +449,51 @@ struct PokemonListView: View {
             await loadInitialPokemons()
         }
     }
+    
 }
 
 struct ProfileView: View {
     @Binding var view: Int
     var username: String = ""
     var body: some View {
-       
-            // Contenedor principal
-            VStack(spacing: 40) {
-                Spacer()
-                
-                // Avatar
-                Image("avatarImage") // Usa una imagen en tus Assets
+        
+        // Contenedor principal
+        VStack(spacing: 40) {
+            Spacer()
+            
+            // Avatar
+            Image("avatarImage") // Usa una imagen en tus Assets
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 100, height: 100)
+                .clipShape(Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.red, lineWidth: 2) // Borde circular
+                )
+                .offset(y: 25)
+            
+            // Texto centrado
+            Text(username)
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.black)
+            
+            // Botón de salida
+            
+            Button(action: {
+                view = 3
+            }) {
+                Image("exit") // Icono del sistema
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(Color.red, lineWidth: 2) // Borde circular
-                    )
-                    .offset(y: 25)
-                
-                // Texto centrado
-                Text(username)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.black)
-                
-                // Botón de salida
-               
-                    Button(action: {
-                        view = 3
-                    }) {
-                        Image("exit") // Icono del sistema
-                            .resizable()
-                            .foregroundColor(.white)
-                            .frame(width: 50, height: 50)
-                            .background(Circle().fill(Color.red))
-                            .padding()
-                    }
-                
-                
-                Spacer()
+                    .foregroundColor(.white)
+                    .frame(width: 50, height: 50)
+                    .background(Circle().fill(Color.red))
+                    .padding()
             }
+            
+            
+            Spacer()
+        }
         
     }
 }
@@ -539,11 +549,11 @@ struct BattleFooterView: View {
                                 Image("start")
                                     .resizable()
                                     .frame(width: 40, height: 40)
-                                }
+                            }
                         }
                     }
                 }
-            
+                
                 // Botón de continuar
                 if !isContinuar {
                     Button(action: {
@@ -580,7 +590,7 @@ struct FooterView: View {
                     .resizable()
                     .frame(width: 61, height: 65)
             }
-
+            
             // Boton de menu
             Button(action: {
                 view = 1
@@ -589,7 +599,7 @@ struct FooterView: View {
                     .resizable()
                     .frame(width: 61, height: 65)
             }
-
+            
             // Boton de perfil
             Button(action: {
                 view = 2
@@ -603,7 +613,7 @@ struct FooterView: View {
         .background(
             Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0)
         )
-
+        
     }
 }
 
@@ -623,39 +633,39 @@ struct MenuView: View {
     @State var isContinuar: Bool = false
     
     var body: some View {
-            NavigationView {
-                   if view != 3 {
-                       VStack {
-                           if view != 2 {
-                               HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
-                               if (!isContinuar) {
-                                   PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                               } else {
-                                   ForEach(pokemon_battle, id: \.id) { pokemon in
-                                       CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                                           .offset(x: 7)
-                                   }
-                               }
-                               
-                               if (view == 0) {
-                                   BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar)
-                               }
-                           } else {
-                               ProfileView(view: $view, username: vm.currentUserNickname)
-                           }
-                           Spacer()
-                           FooterView(view: $view)
-                       }
-                       .navigationBarBackButtonHidden(true)
-                   } else {
-                       // Eliminamos el padding implícito con ZStack
-                        ZStack {
-                            SignInView()
-                                .edgesIgnoringSafeArea(.all) // Elimina cualquier margen o padding no deseado
+        NavigationView {
+            if view != 3 {
+                VStack {
+                    if view != 2 {
+                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
+                        if (!isContinuar) {
+                            PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        } else {
+                            ForEach(pokemon_battle, id: \.id) { pokemon in
+                                CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                                    .offset(x: 7)
+                            }
                         }
-                   }
+                        
+                        if (view == 0) {
+                            BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar)
+                        }
+                    } else {
+                        ProfileView(view: $view, username: vm.currentUserNickname)
+                    }
+                    Spacer()
+                    FooterView(view: $view)
+                }
+                .navigationBarBackButtonHidden(true)
+            } else {
+                // Eliminamos el padding implícito con ZStack
+                ZStack {
+                    SignInView()
+                        .edgesIgnoringSafeArea(.all) // Elimina cualquier margen o padding no deseado
+                }
             }
-            .navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
     }
 }
 
@@ -664,7 +674,7 @@ struct MenuView_Previews: PreviewProvider {
     static var previews: some View {
         let previewViewModel = ViewModel.instance
         previewViewModel.currentUserNickname = "Luis"
-
+        
         return MenuView()
             .environmentObject(previewViewModel)
     }
