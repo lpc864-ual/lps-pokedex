@@ -202,11 +202,13 @@ class ViewModel: ObservableObject {
     @State var move_offset: Int = 0
 
     func pokeApi(endpoint: String) async -> [String: Any] {
-        guard let url = URL(string: "https://pokeapi.co/api/v2/\(endpoint)")
-        else { return [:] }
-        let (data, _) = try! await URLSession.shared.data(from: url)
-        return (try? JSONSerialization.jsonObject(with: data) as? [String: Any])
-            ?? [:]
+        guard let url = URL(string: "https://pokeapi.co/api/v2/\(endpoint)") else { return [:] }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return (try? JSONSerialization.jsonObject(with: data) as? [String: Any]) ?? [:]
+        } catch {
+            return [:]
+        }
     }
 
     func loadPokemon(name: String) async -> Pokemon {
@@ -242,22 +244,22 @@ class ViewModel: ObservableObject {
                     result[statName] = baseStat
                 }
             } ?? [:]
-        let image = Image(
-            uiImage: UIImage(
-                data: try! await URLSession.shared.data(
-                    from: URL(
-                        string:
-                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\(id).png"
-                    )!
-                ).0)!)
-        let image_shiny = Image(
-            uiImage: UIImage(
-                data: try! await URLSession.shared.data(
-                    from: URL(
-                        string:
-                            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/\(id).png"
-                    )!
-                ).0)!)
+        let image: Image
+        if let url = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/\(id).png"),
+           let data = try? await URLSession.shared.data(from: url).0,
+           let uiImage = UIImage(data: data) {
+            image = Image(uiImage: uiImage)
+        } else { // En caso de error, asignar una imagen vacía
+            image = Image(systemName: "questionmark.circle")
+        }
+        let image_shiny: Image
+        if let url = URL(string: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/\(id).png"),
+           let data = try? await URLSession.shared.data(from: url).0,
+           let uiImage = UIImage(data: data) {
+            image_shiny = Image(uiImage: uiImage)
+        } else { // En caso de error, asignar una imagen vacía
+            image_shiny = Image(systemName: "questionmark.circle")
+        }
         var evolution_chain_id = 0
         if let species = pokemon_species["evolution_chain"] as? [String: Any] {
             evolution_chain_id = Int(

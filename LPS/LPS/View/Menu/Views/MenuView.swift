@@ -9,7 +9,12 @@ import SwiftUI
 
 struct BusquedaView: View {
     @Binding var query: String
-    
+    @Binding var pokemon_names: [String]
+    @Binding var pokemons: [Pokemon]
+    @Binding var pokemon_offset: Int
+
+    @State private var currentTask: Task<Void, Never>? = nil
+
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
@@ -22,16 +27,25 @@ struct BusquedaView: View {
                 }
                 TextField("", text: $query)
                     .frame(height: 8)
+                    .onChange(of: query) { _ in
+                        // Si ya existe una tarea en ejecución, la eliminamos automáticamente
+                        currentTask = Task {
+                            if Task.isCancelled { return } // Comprobamos si la tarea está cancelada antes de continuar
+                            pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: [], generationFilter: 0)
+                            if Task.isCancelled { return }
+                            pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: 0, limit: 10)
+                            if Task.isCancelled { return }
+                            pokemon_offset = pokemons.count
+                        }
+                    }
             }
-            
         }
         .padding()
         .frame(width: 325, height: 40)
-        .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.black.opacity(0.5), lineWidth: 2)
-        )
-        
+        .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.black.opacity(0.5), lineWidth: 2))
     }
 }
+
 
 // Vista para mostrar las opciones en grupos de 3
 struct GridView: View {
@@ -100,6 +114,9 @@ struct HeaderView: View {
     //@State var isFavorite: Bool = false
     var username: String = ""
     @Binding var query: String
+    @Binding var pokemon_names: [String]
+    @Binding var pokemons: [Pokemon]
+    @Binding var pokemon_offset: Int
     @Binding var isContinuar: Bool
     
     @State private var isTypeOpen: Bool = false
@@ -132,7 +149,7 @@ struct HeaderView: View {
         "4° Sinnoh": Color("grassColor"),
         "5° Teselia": Color("electricColor"),
         "6° Kalos": Color("iceColor"),
-        "7° Alola": Color("fightColor"),
+        "7° Alola": Color("fightingColor"),
         "8° Galar": Color("flyingColor"),
         "9° Paldea": Color("poisonColor"),
     ]
@@ -151,7 +168,7 @@ struct HeaderView: View {
             
             if (!isContinuar) {
                 HStack {
-                    BusquedaView(query: $query)
+                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset)
                     Button {
                         
                     } label: {
@@ -175,8 +192,7 @@ struct HeaderView: View {
                             .foregroundColor(.black)
                             .cornerRadius(8)
                     }
-                    
-                    //                // Botón para mostrar las opciones de filtro de generación
+                    // Botón para mostrar las opciones de filtro de generación
                     Button(action: {
                         withAnimation {
                             isGenerationOpen.toggle()
@@ -286,6 +302,7 @@ struct CardView: View {
         .background(Color(getTypeColorName(pokemon.types.first)) )
         .cornerRadius(20)
         .scaledToFit()
+        .frame(maxWidth: 250)
     }
 }
 
@@ -361,42 +378,6 @@ struct CardBattleView: View {
     }
 }
 
-// Vista para una fila de dos cards de Pokémon
-struct PokemonRowView: View {
-    @Binding var query: String
-    @Binding var selectedFilters: [String]
-    var pokemons: [Pokemon]
-    var index: Int
-    var currentUserNickname: String
-    @Binding var view: Int
-    @Binding var pokemon_battle: [Pokemon]
-    @Binding var pokemon_images: [Image]
-    
-    // Función para obtener el número de generación
-    private func getGenerationFilter() -> Int {
-        for filter in selectedFilters {
-            if let match = filter.first(where: { $0.isNumber }), let number = Int(String(match)) {
-                return number
-            }
-        }
-        return 0 // Si no hay número en los filtros, devolvemos 0
-    }
-    
-    var body: some View {
-        // (getGenerationFilter() == 0 || pokemons[index].generation == String(getGenerationFilter()))
-        
-        if (query.isEmpty || pokemons[index].name.lowercased().contains(query.lowercased())) &&
-            (selectedFilters.isEmpty || selectedFilters.allSatisfy { type in
-                // Verificamos que todos los filtros seleccionados están presentes en los tipos del Pokémon
-                pokemons[index].types.contains { $0.lowercased() == type.lowercased() }
-            }) {
-            // Si pasa todos los filtros, mostramos la CardView
-            CardView(pokemon: pokemons[index], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                .offset(x: 7)
-        }
-    }
-}
-
 // Vista principal para mostrar la lista de Pokémon
 struct PokemonListView: View {
     @Binding var pokemons: [Pokemon]
@@ -424,19 +405,24 @@ struct PokemonListView: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack { // Cambiar a LazyVStack para una carga más eficiente
+            LazyVStack {
                 // Dividimos los Pokémon en grupos de dos por cada fila
                 ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
                     HStack {
-                        PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        // Mostrar el primer Pokémon en la fila
+                        CardView(pokemon: pokemons[index], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            .offset(x: 7)
+                        
+                        // Mostrar el segundo Pokémon en la fila, si existe
                         if index + 1 < pokemons.count {
-                            PokemonRowView(query: $query, selectedFilters: $selectedFilters, pokemons: pokemons, index: index + 1, currentUserNickname: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            CardView(pokemon: pokemons[index + 1], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                                .offset(x: 7)
                         }
                     }
                     .padding(0)
                     .onAppear {
                         // Si el usuario ha llegado al final del contenido actual, carga más Pokémon
-                        if index == pokemons.count - 2 { // Detecta la penúltima fila
+                        if index >= pokemons.count - 2 { // Detecta las últimas filas
                             Task {
                                 await loadMorePokemons()
                             }
@@ -449,7 +435,6 @@ struct PokemonListView: View {
             await loadInitialPokemons()
         }
     }
-    
 }
 
 struct ProfileView: View {
@@ -637,7 +622,7 @@ struct MenuView: View {
             if view != 3 {
                 VStack {
                     if view != 2 {
-                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
+                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
                         if (!isContinuar) {
                             PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                         } else {
