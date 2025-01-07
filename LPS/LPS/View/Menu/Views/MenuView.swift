@@ -12,9 +12,9 @@ struct BusquedaView: View {
     @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
     @Binding var pokemon_offset: Int
-
-    @State private var currentTask: Task<Void, Never>? = nil
-
+    
+    @State private var lastQuery: String = ""
+    
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
@@ -27,14 +27,22 @@ struct BusquedaView: View {
                 }
                 TextField("", text: $query)
                     .frame(height: 8)
-                    .onChange(of: query) { _ in
-                        // Si ya existe una tarea en ejecución, la eliminamos automáticamente
-                        currentTask = Task {
-                            if Task.isCancelled { return } // Comprobamos si la tarea está cancelada antes de continuar
-                            pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: [], generationFilter: 0)
-                            if Task.isCancelled { return }
-                            pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: 0, limit: 10)
-                            if Task.isCancelled { return }
+                    .onChange(of: query) { newQuery in
+                        // Actualiza el lastQuery con el nuevo valor del query
+                        lastQuery = newQuery
+                        // Ejecuta la búsqueda en un Task asíncrono
+                        Task {
+                            // Si el query ha cambiado después de haber comenzado, no continuamos
+                            guard newQuery == lastQuery else { return }
+                            let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: newQuery, typeFilter: [], generationFilter: 0)
+                            // Verifica nuevamente si el query actual sigue siendo relevante
+                            guard newQuery == lastQuery else { return }
+                            let aux_pokemons = await ViewModel.instance.listPokemons(pokemon_names: aux_pokemon_names, offset: 0, limit: 10)
+                            // Verifica si el query aún es el último
+                            guard newQuery == lastQuery else { return }
+                            // Solo actualiza los valores si el query es el último
+                            pokemon_names = aux_pokemon_names
+                            pokemons = aux_pokemons
                             pokemon_offset = pokemons.count
                         }
                     }
@@ -45,7 +53,6 @@ struct BusquedaView: View {
         .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.black.opacity(0.5), lineWidth: 2))
     }
 }
-
 
 // Vista para mostrar las opciones en grupos de 3
 struct GridView: View {
@@ -243,7 +250,6 @@ struct CardView: View {
     // Función para construir el nombre del color
     private func getTypeColorName(_ type: String?) -> String {
         guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
-        print(type)
         return type.lowercased() + "Color" // Construye el nombre del color
     }
     
@@ -295,14 +301,15 @@ struct CardView: View {
                         
                     }
                 }
-                .offset(x: 15, y: 20)
+                .offset(x: 17, y: 20)
             }
         }
         .padding()
         .background(Color(getTypeColorName(pokemon.types.first)) )
         .cornerRadius(20)
         .scaledToFit()
-        .frame(maxWidth: 250)
+        .offset(x: 0)
+        .frame(maxWidth: 190)
     }
 }
 
@@ -317,7 +324,6 @@ struct CardBattleView: View {
     // Función para construir el nombre del color
     private func getTypeColorName(_ type: String?) -> String {
         guard let type = type else { return "defaultColor" } // Si no hay tipo, devuelve un valor por defecto
-        print(type)
         return type.lowercased() + "Color" // Construye el nombre del color
     }
     
@@ -368,13 +374,15 @@ struct CardBattleView: View {
                         
                     }
                 }
-                .offset(x: 15, y: 20)
+                .offset(x: 17, y: 20)
             }
         }
         .padding()
         .background(Color(getTypeColorName(pokemon.types.first)))
         .cornerRadius(20)
         .scaledToFit()
+        .offset(x: 0)
+        .frame(maxWidth: 190)
     }
 }
 
@@ -411,12 +419,11 @@ struct PokemonListView: View {
                     HStack {
                         // Mostrar el primer Pokémon en la fila
                         CardView(pokemon: pokemons[index], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                            .offset(x: 7)
-                        
                         // Mostrar el segundo Pokémon en la fila, si existe
                         if index + 1 < pokemons.count {
                             CardView(pokemon: pokemons[index + 1], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                                .offset(x: 7)
+                        } else {
+                            Spacer().frame(maxWidth: 198)
                         }
                     }
                     .padding(0)
