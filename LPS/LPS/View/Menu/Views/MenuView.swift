@@ -58,7 +58,8 @@ struct BusquedaView: View {
 struct GridView: View {
     let items: [String]
     let colors: [String: Color]
-    @Binding var selectedFilters: [String]
+    @Binding var selectedTypeFilters: [String]
+    @Binding var selectedGenerationFilters: Int
     let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
     
     var body: some View {
@@ -70,21 +71,16 @@ struct GridView: View {
                     ForEach(row, id: \.self) { item in
                         Button(action: {
                             if isSingleSelection {
-                                // Si el item actual ya está seleccionado, lo deseleccionamos
-                                if selectedFilters.contains(item.lowercased()) {
-                                    selectedFilters.removeAll()
-                                } else {
-                                    // Si no está seleccionado, lo seleccionamos y deseleccionamos el resto
-                                    selectedFilters = [item.lowercased()]
-                                }
+                                selectedGenerationFilters = Int(item.lowercased().prefix(1)) ?? 0
                             } else {
                                 // Si ya existe, lo eliminamos
-                                if let index = selectedFilters.firstIndex(of: item.lowercased()) {
-                                    selectedFilters.remove(at: index)
+                                if let index = selectedTypeFilters.firstIndex(of: item.lowercased()) {
+                                    selectedTypeFilters.remove(at: index)
                                 } else {
-                                    selectedFilters.append(item.lowercased())
+                                    selectedTypeFilters.append(item.lowercased())
                                 }
                             }
+                            print(selectedGenerationFilters, selectedTypeFilters)
                         }) {
                             Text(item)
                                 .frame(maxWidth: .infinity)
@@ -92,7 +88,7 @@ struct GridView: View {
                                 .background(colors[item] ?? Color.gray)
                                 .foregroundColor(.black)
                                 .cornerRadius(8)
-                                .opacity(selectedFilters.contains(item.lowercased()) ? 1 : 0.2)
+                                .opacity(selectedTypeFilters.contains(item.lowercased()) ? 1 : 0.2)
                         }
                         
                     }
@@ -161,7 +157,8 @@ struct HeaderView: View {
         "9° Paldea": Color("poisonColor"),
     ]
     
-    @Binding var selectedFilters: [String]
+    @Binding var selectedTypeFilters: [String]
+    @Binding var selectedGenerationFilters: Int
     
     var body: some View {
         VStack {
@@ -221,7 +218,8 @@ struct HeaderView: View {
                     GridView(
                         items: Array(generationColors.keys.sorted()),
                         colors: generationColors,
-                        selectedFilters: $selectedFilters,
+                        selectedTypeFilters: $selectedTypeFilters,
+                        selectedGenerationFilters: $selectedGenerationFilters,
                         isSingleSelection: true // Generación será de selección única
                     )
                 }
@@ -230,7 +228,8 @@ struct HeaderView: View {
                     GridView(
                         items: Array(typeColors.keys.sorted()),
                         colors: typeColors,
-                        selectedFilters: $selectedFilters,
+                        selectedTypeFilters: $selectedTypeFilters,
+                        selectedGenerationFilters: $selectedGenerationFilters,
                         isSingleSelection: false // Tipos permiten selección múltiple
                     )
                 }
@@ -388,28 +387,13 @@ struct CardBattleView: View {
 
 // Vista principal para mostrar la lista de Pokémon
 struct PokemonListView: View {
+    @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
     @Binding var pokemon_offset: Int
-    @Binding var pokemon_names: [String]
-    @Binding var query: String
-    @Binding var selectedFilters: [String]
     var currentUserNickname: String
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
-    
-    // Función para cargar más Pokémon
-    private func loadMorePokemons() async {
-        pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
-        pokemon_offset = pokemons.count
-    }
-    
-    // Función para cargar los Pokémon iniciales
-    private func loadInitialPokemons() async {
-        pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: [], generationFilter: 0)
-        pokemons = await ViewModel.instance.listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
-        pokemon_offset += 10
-    }
     
     var body: some View {
         ScrollView {
@@ -431,7 +415,8 @@ struct PokemonListView: View {
                         // Si el usuario ha llegado al final del contenido actual, carga más Pokémon
                         if index >= pokemons.count - 2 { // Detecta las últimas filas
                             Task {
-                                await loadMorePokemons()
+                                pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
+                                pokemon_offset = pokemons.count
                             }
                         }
                     }
@@ -439,7 +424,9 @@ struct PokemonListView: View {
             }
         }
         .task {
-            await loadInitialPokemons()
+            pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: "", typeFilter: [], generationFilter: 0)
+            pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
+            pokemon_offset = pokemons.count
         }
     }
 }
@@ -614,7 +601,8 @@ struct MenuView: View {
     @EnvironmentObject var vm: ViewModel
     @State var view: Int = 1  //0: BattleView, 1: mainView, 2: profileView; 3: exit
     @State var query: String = ""
-    @State var selectedFilters: [String] = []
+    @State var selectedTypeFilters: [String] = []
+    @State var selectedGenerationFilters: Int = 0
     @State var pokemon_names: [String] = []
     @State var pokemons: [Pokemon] = []
     @State var pokemon_offset: Int = 0
@@ -629,13 +617,12 @@ struct MenuView: View {
             if view != 3 {
                 VStack {
                     if view != 2 {
-                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedFilters: $selectedFilters)
+                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
                         if (!isContinuar) {
-                            PokemonListView(pokemons: $pokemons, pokemon_offset: $pokemon_offset, pokemon_names: $pokemon_names, query: $query, selectedFilters: $selectedFilters, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                         } else {
                             ForEach(pokemon_battle, id: \.id) { pokemon in
                                 CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                                    .offset(x: 7)
                             }
                         }
                         
