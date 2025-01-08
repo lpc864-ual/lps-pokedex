@@ -12,6 +12,8 @@ struct BusquedaView: View {
     @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
     @Binding var pokemon_offset: Int
+    @Binding var selectedTypeFilters: [String]
+    @Binding var selectedGenerationFilters: Int
     
     @State private var lastQuery: String = ""
     
@@ -34,7 +36,7 @@ struct BusquedaView: View {
                         Task {
                             // Si el query ha cambiado después de haber comenzado, no continuamos
                             guard newQuery == lastQuery else { return }
-                            let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: newQuery, typeFilter: [], generationFilter: 0)
+                            let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: newQuery, typeFilter: selectedTypeFilters, generationFilter: selectedGenerationFilters)
                             // Verifica nuevamente si el query actual sigue siendo relevante
                             guard newQuery == lastQuery else { return }
                             let aux_pokemons = await ViewModel.instance.listPokemons(pokemon_names: aux_pokemon_names, offset: 0, limit: 10)
@@ -58,6 +60,10 @@ struct BusquedaView: View {
 struct GridView: View {
     let items: [String]
     let colors: [String: Color]
+    @Binding var query: String
+    @Binding var pokemon_names: [String]
+    @Binding var pokemons: [Pokemon]
+    @Binding var pokemon_offset: Int
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
     let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
@@ -71,7 +77,11 @@ struct GridView: View {
                     ForEach(row, id: \.self) { item in
                         Button(action: {
                             if isSingleSelection {
-                                selectedGenerationFilters = Int(item.lowercased().prefix(1)) ?? 0
+                                if selectedGenerationFilters == Int(item.lowercased().prefix(1)) {
+                                    selectedGenerationFilters = 0
+                                } else {
+                                    selectedGenerationFilters = Int(item.lowercased().prefix(1)) ?? 0
+                                }
                             } else {
                                 // Si ya existe, lo eliminamos
                                 if let index = selectedTypeFilters.firstIndex(of: item.lowercased()) {
@@ -80,7 +90,29 @@ struct GridView: View {
                                     selectedTypeFilters.append(item.lowercased())
                                 }
                             }
-                            print(selectedGenerationFilters, selectedTypeFilters)
+                            let lastSelectedTypeFilters = selectedTypeFilters
+                            let lastSelectedGenerationFilters = selectedGenerationFilters
+                            // Ejecuta la búsqueda en un Task asíncrono
+                            Task {
+                                // Si el query ha cambiado después de haber comenzado, no continuamos
+                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
+                                guard lastSelectedTypeFilters == selectedTypeFilters &&
+                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
+                                let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: selectedTypeFilters, generationFilter: selectedGenerationFilters)
+                                // Verifica nuevamente si el query actual sigue siendo relevante
+                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
+                                guard lastSelectedTypeFilters == selectedTypeFilters &&
+                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
+                                let aux_pokemons = await ViewModel.instance.listPokemons(pokemon_names: aux_pokemon_names, offset: 0, limit: 10)
+                                // Verifica si el query aún es el último
+                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
+                                guard lastSelectedTypeFilters == selectedTypeFilters &&
+                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
+                                // Solo actualiza los valores si el query es el último
+                                pokemon_names = aux_pokemon_names
+                                pokemons = aux_pokemons
+                                pokemon_offset = pokemons.count
+                            }
                         }) {
                             Text(item)
                                 .frame(maxWidth: .infinity)
@@ -88,7 +120,7 @@ struct GridView: View {
                                 .background(colors[item] ?? Color.gray)
                                 .foregroundColor(.black)
                                 .cornerRadius(8)
-                                .opacity(selectedTypeFilters.contains(item.lowercased()) ? 1 : 0.2)
+                                .opacity(selectedTypeFilters.contains(item.lowercased()) || (isSingleSelection && selectedGenerationFilters == Int(item.lowercased().prefix(1))) ? 1 : 0.2)
                         }
                         
                     }
@@ -100,8 +132,6 @@ struct GridView: View {
         .offset(y: -20)
     }
 }
-
-
 
 // Extensión para dividir un array en grupos
 extension Array {
@@ -172,7 +202,7 @@ struct HeaderView: View {
             
             if (!isContinuar) {
                 HStack {
-                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset)
+                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
                     Button {
                         
                     } label: {
@@ -218,6 +248,10 @@ struct HeaderView: View {
                     GridView(
                         items: Array(generationColors.keys.sorted()),
                         colors: generationColors,
+                        query: $query,
+                        pokemon_names: $pokemon_names,
+                        pokemons: $pokemons,
+                        pokemon_offset: $pokemon_offset,
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
                         isSingleSelection: true // Generación será de selección única
@@ -228,6 +262,10 @@ struct HeaderView: View {
                     GridView(
                         items: Array(typeColors.keys.sorted()),
                         colors: typeColors,
+                        query: $query,
+                        pokemon_names: $pokemon_names,
+                        pokemons: $pokemons,
+                        pokemon_offset: $pokemon_offset,
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
                         isSingleSelection: false // Tipos permiten selección múltiple
