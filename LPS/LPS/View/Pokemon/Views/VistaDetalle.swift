@@ -2,11 +2,17 @@ import SwiftUI
 
 struct VistaDetalle: View {
     let pokemon : Pokemon
-    //@Environment var viewModel : ViewModel
+    @EnvironmentObject var vm: ViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var selectedTab: Tab = .about
     @State private var isShiny: Bool = false
-    @State private var favorite: Bool = false
+    @State private var isFavorito: Bool
+    
+    init(pokemon: Pokemon) {
+            self.pokemon = pokemon
+            isFavorito = ViewModel.instance.isFavorito(username: ViewModel.instance.currentUserNickname, pokemonName: pokemon.name)
+    }
+    
     var colorFondo: Color {
         Color(getColor(pokemon.types.first ?? "default"))
     }
@@ -20,7 +26,7 @@ struct VistaDetalle: View {
             HStack{
                 Spacer()
                     .frame(width: 140)
-                Image("poke")
+                Image("pokeball_bg")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 250)
@@ -69,9 +75,10 @@ struct VistaDetalle: View {
                         .foregroundColor(.white)
                     //Botón Favorito
                     Button(action: {
-                        favorite.toggle()
+                        vm.toggleFavorito(username: vm.currentUserNickname, pokemonName: pokemon.name)
+                        isFavorito = ViewModel.instance.isFavorito(username: ViewModel.instance.currentUserNickname, pokemonName: pokemon.name)
                     }) {
-                        Image(systemName: favorite ? "heart.fill" : "heart")
+                        Image(systemName: isFavorito ? "heart.fill" : "heart")
                             .foregroundColor(.white)
                     }
                     
@@ -205,7 +212,7 @@ struct TabContent: View {
                 VistaEvolution(/*viewmodel: viewModel,*/ evolutions: pokemon.evolution_chain_id, colorFondo: colorFondo)
             case .moves:
                 VistaMovimientos(moves: pokemon.moves,
-                                 colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "Normal")
+                                 colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "")
             }
         }
     }

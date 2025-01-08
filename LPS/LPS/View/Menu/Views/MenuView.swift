@@ -7,15 +7,49 @@
 
 import SwiftUI
 
+// Función asíncrona común para manejar la lógica de filtrado con parámetros pasados por referencia
+func applyFilters(query: Binding<String>, selectedTypeFilters: Binding<[String]>, selectedGenerationFilters: Binding<Int>, isFavorito: Binding<Bool>, pokemon_names: Binding<[String]>, pokemons: Binding<[Pokemon]>, pokemon_offset: Binding<Int>, username: String
+) async {
+    let lastQuery = query.wrappedValue
+    let lastSelectedTypeFilters = selectedTypeFilters.wrappedValue
+    let lastSelectedGenerationFilters = selectedGenerationFilters.wrappedValue
+    let lastIsFavorito = isFavorito.wrappedValue
+    // Ejecuta los filtros en un Task asíncrono
+    Task {
+        // Si los filtros han cambiado después de haber comenzado, no continuamos
+        guard lastQuery == query.wrappedValue && lastSelectedTypeFilters == selectedTypeFilters.wrappedValue && lastSelectedGenerationFilters == selectedGenerationFilters.wrappedValue && lastIsFavorito == isFavorito.wrappedValue else { return }
+        var auxPokemonNames = await ViewModel.instance.filterPokemons(
+            searchQuery: query.wrappedValue,
+            typeFilter: selectedTypeFilters.wrappedValue,
+            generationFilter: selectedGenerationFilters.wrappedValue
+        )
+        if isFavorito.wrappedValue {
+            auxPokemonNames = auxPokemonNames.filter { ViewModel.instance.getFavoritos(username: username).contains($0) }
+        }
+        // Verifica nuevamente si los filtros actuales siguen siendo relevantes
+        guard lastQuery == query.wrappedValue && lastSelectedTypeFilters == selectedTypeFilters.wrappedValue && lastSelectedGenerationFilters == selectedGenerationFilters.wrappedValue && lastIsFavorito == isFavorito.wrappedValue else { return }
+        let auxPokemons = await ViewModel.instance.listPokemons(
+            pokemon_names: auxPokemonNames,
+            offset: 0,
+            limit: 10
+        )
+        // Solo actualiza los valores si los filtros son los últimos
+        guard lastQuery == query.wrappedValue && lastSelectedTypeFilters == selectedTypeFilters.wrappedValue && lastSelectedGenerationFilters == selectedGenerationFilters.wrappedValue && lastIsFavorito == isFavorito.wrappedValue else { return }
+        pokemon_names.wrappedValue = auxPokemonNames
+        pokemons.wrappedValue = auxPokemons
+        pokemon_offset.wrappedValue = auxPokemons.count
+    }
+}
+
 struct BusquedaView: View {
+    @EnvironmentObject var vm: ViewModel
     @Binding var query: String
     @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
     @Binding var pokemon_offset: Int
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
-    
-    @State private var lastQuery: String = ""
+    @Binding var isFavorito: Bool
     
     var body: some View {
         HStack {
@@ -29,23 +63,10 @@ struct BusquedaView: View {
                 }
                 TextField("", text: $query)
                     .frame(height: 8)
-                    .onChange(of: query) { newQuery in
-                        // Actualiza el lastQuery con el nuevo valor del query
-                        lastQuery = newQuery
-                        // Ejecuta la búsqueda en un Task asíncrono
+                    .onChange(of: query) {
+                        // Ejecuta los filtros en un Task asíncrono
                         Task {
-                            // Si el query ha cambiado después de haber comenzado, no continuamos
-                            guard newQuery == lastQuery else { return }
-                            let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: newQuery, typeFilter: selectedTypeFilters, generationFilter: selectedGenerationFilters)
-                            // Verifica nuevamente si el query actual sigue siendo relevante
-                            guard newQuery == lastQuery else { return }
-                            let aux_pokemons = await ViewModel.instance.listPokemons(pokemon_names: aux_pokemon_names, offset: 0, limit: 10)
-                            // Verifica si el query aún es el último
-                            guard newQuery == lastQuery else { return }
-                            // Solo actualiza los valores si el query es el último
-                            pokemon_names = aux_pokemon_names
-                            pokemons = aux_pokemons
-                            pokemon_offset = pokemons.count
+                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
                         }
                     }
             }
@@ -58,6 +79,7 @@ struct BusquedaView: View {
 
 // Vista para mostrar las opciones en grupos de 3
 struct GridView: View {
+    @EnvironmentObject var vm: ViewModel
     let items: [String]
     let colors: [String: Color]
     @Binding var query: String
@@ -66,6 +88,7 @@ struct GridView: View {
     @Binding var pokemon_offset: Int
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
+    @Binding var isFavorito: Bool
     let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
     
     var body: some View {
@@ -90,28 +113,8 @@ struct GridView: View {
                                     selectedTypeFilters.append(item.lowercased())
                                 }
                             }
-                            let lastSelectedTypeFilters = selectedTypeFilters
-                            let lastSelectedGenerationFilters = selectedGenerationFilters
-                            // Ejecuta la búsqueda en un Task asíncrono
                             Task {
-                                // Si el query ha cambiado después de haber comenzado, no continuamos
-                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
-                                guard lastSelectedTypeFilters == selectedTypeFilters &&
-                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
-                                let aux_pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: query, typeFilter: selectedTypeFilters, generationFilter: selectedGenerationFilters)
-                                // Verifica nuevamente si el query actual sigue siendo relevante
-                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
-                                guard lastSelectedTypeFilters == selectedTypeFilters &&
-                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
-                                let aux_pokemons = await ViewModel.instance.listPokemons(pokemon_names: aux_pokemon_names, offset: 0, limit: 10)
-                                // Verifica si el query aún es el último
-                                print(lastSelectedTypeFilters, selectedTypeFilters, lastSelectedGenerationFilters, selectedGenerationFilters)
-                                guard lastSelectedTypeFilters == selectedTypeFilters &&
-                                        lastSelectedGenerationFilters == selectedGenerationFilters else { return }
-                                // Solo actualiza los valores si el query es el último
-                                pokemon_names = aux_pokemon_names
-                                pokemons = aux_pokemons
-                                pokemon_offset = pokemons.count
+                                await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
                             }
                         }) {
                             Text(item)
@@ -143,9 +146,9 @@ extension Array {
 }
 
 struct HeaderView: View {
+    @EnvironmentObject var vm: ViewModel
     @Binding var view: Int
-    //@State var isFavorite: Bool = false
-    var username: String = ""
+    @Binding var isFavorito: Bool
     @Binding var query: String
     @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
@@ -193,7 +196,7 @@ struct HeaderView: View {
     var body: some View {
         VStack {
             HStack {
-                Text(view == 0 ? (isContinuar ? "Team Preview" : "Team Select") : "Hi! " + username + " 👋")
+                Text(view == 0 ? (isContinuar ? "Team Preview" : "Team Select") : "Hi! " + vm.currentUserNickname + " 👋")
                     .font(.system(size: 34))
                     .fontWeight(.medium)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -202,11 +205,14 @@ struct HeaderView: View {
             
             if (!isContinuar) {
                 HStack {
-                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
+                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito)
                     Button {
-                        
+                        isFavorito = !isFavorito
+                        Task {
+                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
+                        }
                     } label: {
-                        Image(systemName: 1 == 1 ? "heart" : "heart.fill")
+                        Image(systemName: $isFavorito.wrappedValue ? "heart.fill" : "heart")
                             .foregroundColor(.red)
                             .font(.system(size: 30))
                     }
@@ -254,6 +260,7 @@ struct HeaderView: View {
                         pokemon_offset: $pokemon_offset,
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
+                        isFavorito: $isFavorito,
                         isSingleSelection: true // Generación será de selección única
                     )
                 }
@@ -268,6 +275,7 @@ struct HeaderView: View {
                         pokemon_offset: $pokemon_offset,
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
+                        isFavorito: $isFavorito,
                         isSingleSelection: false // Tipos permiten selección múltiple
                     )
                 }
@@ -279,7 +287,6 @@ struct HeaderView: View {
 
 struct CardView: View {
     var pokemon: Pokemon
-    var username: String
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
@@ -291,69 +298,69 @@ struct CardView: View {
     }
     
     var body: some View {
-        VStack {
-            HStack {
-                Text(pokemon.name)
-                    .foregroundStyle(.white)
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("#" + String(format: "%04d", pokemon.id))
-                    .foregroundStyle(.black.opacity(0.4))
-            }
-            
-            HStack {
-                VStack {
-                    ForEach(pokemon.types, id: \.self) { type in
-                        Text(type)
-                            .frame(width: 60, height: 30)
-                            .font(.system(size: 12))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .background(
-                                RoundedRectangle(cornerRadius: 32)
-                                    .fill(Color(getTypeColorName(type)))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 32)
-                                    .stroke(Color.white, lineWidth: 2)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 32))
-                    }
+        NavigationLink(destination: VistaDetalle(pokemon: pokemon)) {
+            VStack {
+                HStack {
+                    Text(pokemon.name)
+                        .foregroundStyle(.white)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("#" + String(format: "%04d", pokemon.id))
+                        .foregroundStyle(.black.opacity(0.4))
                 }
-                ZStack {
-                    Image("pokeball_bg")
-                    pokemon.image.resizable().scaledToFit().frame(
-                        width: 90, height: 100)
-                    if (view == 0) {
-                        //BOTON DE AGREGAR POKEMON
-                        Button(action: {
-                            if (pokemon_images.count != 3) {
-                                pokemon_battle.append(pokemon)
-                                pokemon_images.append(pokemon.image)
-                            }
-                        }){
-                            Image("addPoke")
-                                .padding([.top, .leading], 50.0)
+                HStack {
+                    VStack {
+                        ForEach(pokemon.types, id: \.self) { type in
+                            Text(type)
+                                .frame(width: 60, height: 30)
+                                .font(.system(size: 12))
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 32)
+                                        .fill(Color(getTypeColorName(type)))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 32)
+                                        .stroke(Color.white, lineWidth: 2)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 32))
                         }
-                        
                     }
+                    ZStack {
+                        Image("pokeball_bg")
+                        pokemon.image.resizable().scaledToFit().frame(
+                            width: 90, height: 100)
+                        if (view == 0) {
+                            //BOTON DE AGREGAR POKEMON
+                            Button(action: {
+                                if (pokemon_images.count != 3) {
+                                    pokemon_battle.append(pokemon)
+                                    pokemon_images.append(pokemon.image)
+                                }
+                            }){
+                                Image("addPoke")
+                                    .padding([.top, .leading], 50.0)
+                            }
+                            
+                        }
+                    }
+                    .offset(x: 17, y: 20)
                 }
-                .offset(x: 17, y: 20)
             }
+            .padding()
+            .background(Color(getTypeColorName(pokemon.types.first)) )
+            .cornerRadius(20)
+            .scaledToFit()
+            .offset(x: 0)
+            .frame(maxWidth: 190)
         }
-        .padding()
-        .background(Color(getTypeColorName(pokemon.types.first)) )
-        .cornerRadius(20)
-        .scaledToFit()
-        .offset(x: 0)
-        .frame(maxWidth: 190)
     }
 }
 
 //GUILLERMO: ENCARGADO DE TERMINARLO Y DEJARLO COMO EL FIGMA
 struct CardBattleView: View {
     var pokemon: Pokemon
-    var username: String
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
@@ -425,10 +432,14 @@ struct CardBattleView: View {
 
 // Vista principal para mostrar la lista de Pokémon
 struct PokemonListView: View {
+    @EnvironmentObject var vm: ViewModel
     @Binding var pokemon_names: [String]
     @Binding var pokemons: [Pokemon]
     @Binding var pokemon_offset: Int
-    var currentUserNickname: String
+    @Binding var query: String
+    @Binding var selectedTypeFilters: [String]
+    @Binding var selectedGenerationFilters: Int
+    @Binding var isFavorito: Bool
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
@@ -440,10 +451,10 @@ struct PokemonListView: View {
                 ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
                     HStack {
                         // Mostrar el primer Pokémon en la fila
-                        CardView(pokemon: pokemons[index], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                        CardView(pokemon: pokemons[index], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                         // Mostrar el segundo Pokémon en la fila, si existe
                         if index + 1 < pokemons.count {
-                            CardView(pokemon: pokemons[index + 1], username: currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            CardView(pokemon: pokemons[index + 1], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                         } else {
                             Spacer().frame(maxWidth: 198)
                         }
@@ -462,16 +473,14 @@ struct PokemonListView: View {
             }
         }
         .task {
-            pokemon_names = await ViewModel.instance.filterPokemons(searchQuery: "", typeFilter: [], generationFilter: 0)
-            pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
-            pokemon_offset = pokemons.count
+            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
         }
     }
 }
 
 struct ProfileView: View {
     @Binding var view: Int
-    var username: String = ""
+    @EnvironmentObject var vm: ViewModel
     var body: some View {
         
         // Contenedor principal
@@ -491,7 +500,7 @@ struct ProfileView: View {
                 .offset(y: 25)
             
             // Texto centrado
-            Text(username)
+            Text(vm.currentUserNickname)
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.black)
             
@@ -636,11 +645,11 @@ struct FooterView: View {
 
 // Vista principal MenuView
 struct MenuView: View {
-    @EnvironmentObject var vm: ViewModel
     @State var view: Int = 1  //0: BattleView, 1: mainView, 2: profileView; 3: exit
     @State var query: String = ""
     @State var selectedTypeFilters: [String] = []
     @State var selectedGenerationFilters: Int = 0
+    @State var isFavorito: Bool = false
     @State var pokemon_names: [String] = []
     @State var pokemons: [Pokemon] = []
     @State var pokemon_offset: Int = 0
@@ -655,12 +664,12 @@ struct MenuView: View {
             if view != 3 {
                 VStack {
                     if view != 2 {
-                        HeaderView(view: $view, username: view == 0 ? "" : vm.currentUserNickname, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
+                        HeaderView(view: $view, isFavorito: $isFavorito, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
                         if (!isContinuar) {
-                            PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, currentUserNickname: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                         } else {
                             ForEach(pokemon_battle, id: \.id) { pokemon in
-                                CardBattleView(pokemon: pokemon, username: vm.currentUserNickname, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                                CardBattleView(pokemon: pokemon, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
                             }
                         }
                         
@@ -668,7 +677,7 @@ struct MenuView: View {
                             BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar)
                         }
                     } else {
-                        ProfileView(view: $view, username: vm.currentUserNickname)
+                        ProfileView(view: $view)
                     }
                     Spacer()
                     FooterView(view: $view)

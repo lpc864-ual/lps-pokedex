@@ -145,6 +145,7 @@ class ViewModel: ObservableObject {
         }
         
         // Extraer los nombres de los Pokémon favoritos
+        print(user.favoritos)
         if let favoritos = user.favoritos as? Set<PokemonFavoritoEntity> {
             return favoritos.compactMap { $0.pokemon_name }
         }
