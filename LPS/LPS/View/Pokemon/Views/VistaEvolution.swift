@@ -19,7 +19,7 @@ struct VistaEvolution: View {
                     .foregroundColor(.gray)
                     .padding()
             } else {
-                VStack(spacing: 20) {
+                VStack(spacing: 18) {
                     ForEach(evolutionData.indices, id: \.self) { index in
                         let (pokemon1, level, pokemon2) = evolutionData[index]
                         

@@ -14,7 +14,7 @@ struct VistaAbout: View {
 
     var body: some View {
         ScrollView{
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 18) {
                 // Peso y Altura con más separación
                 HStack(alignment: .center, spacing: 50) { // Incrementamos el spacing aquí
                     // Peso

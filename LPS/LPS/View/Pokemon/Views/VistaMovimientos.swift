@@ -4,11 +4,16 @@ struct VistaMovimientos: View {
     var moves: [Move]
     var colorFondo: Color
     var pokemonType: String // El tipo del Pokémon
+    @State private var isLoading = true // Para mostrar un indicador de carga
     
     var body: some View {
         ScrollView{
             VStack(spacing: 20) {
-                if moves.isEmpty {
+                if isLoading {
+                    // Indicador de carga mientras se procesan los movimientos
+                    ProgressView("Loading moves...")
+                        .padding()
+                } else if moves.isEmpty {
                     // Mostrar mensaje de "No hay movimientos"
                     Text("There are no moves")
                         .font(.headline)
