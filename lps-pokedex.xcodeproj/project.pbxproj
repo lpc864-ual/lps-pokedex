@@ -29,11 +29,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		357D67AE2D302884006759DC /* lps-pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "lps-pokedex.app"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app"; sourceTree = "<absolute>"; };
+		357D67AF2D302884006759DC /* lps-pokedexTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexTests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app/PlugIns/lps-pokedexTests.xctest"; sourceTree = "<absolute>"; };
+		357D67B02D302884006759DC /* lps-pokedexUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexUITests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedexUITests-Runner.app/PlugIns/lps-pokedexUITests.xctest"; sourceTree = "<absolute>"; };
 		35A0BD402D30106C00BEB806 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		35A0BD412D30106C00BEB806 /* LPSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LPSApp.swift; sourceTree = "<group>"; };
-		35F44A4E2D30237200FC3007 /* lps-pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "lps-pokedex.app"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app"; sourceTree = "<absolute>"; };
-		35F44A4F2D30237200FC3007 /* lps-pokedexTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexTests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app/PlugIns/lps-pokedexTests.xctest"; sourceTree = "<absolute>"; };
-		35F44A502D30237200FC3007 /* lps-pokedexUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexUITests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedexUITests-Runner.app/PlugIns/lps-pokedexUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -127,7 +127,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPS;
-			productReference = 35F44A4E2D30237200FC3007 /* lps-pokedex.app */;
+			productReference = 357D67AE2D302884006759DC /* lps-pokedex.app */;
 			productType = "com.apple.product-type.application";
 		};
 		35E2DAA32CE3B5E5008A5986 /* lps-pokedexTests */ = {
@@ -147,7 +147,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPSTests;
-			productReference = 35F44A4F2D30237200FC3007 /* lps-pokedexTests.xctest */;
+			productReference = 357D67AF2D302884006759DC /* lps-pokedexTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		35E2DAAD2CE3B5E5008A5986 /* lps-pokedexUITests */ = {
@@ -167,7 +167,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPSUITests;
-			productReference = 35F44A502D30237200FC3007 /* lps-pokedexUITests.xctest */;
+			productReference = 357D67B02D302884006759DC /* lps-pokedexUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
