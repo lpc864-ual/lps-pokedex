@@ -7,6 +7,6 @@
     </entity>
     <entity name="PokemonFavoritoEntity" representedClassName="PokemonFavoritoEntity" syncable="YES" codeGenerationType="class">
         <attribute name="pokemon_name" attributeType="String"/>
-        <relationship name="persona" maxCount="1" deletionRule="Cascade" destinationEntity="PersonaEntity" inverseName="favoritos" inverseEntity="PersonaEntity"/>
+        <relationship name="persona" maxCount="1" deletionRule="No Action" destinationEntity="PersonaEntity" inverseName="favoritos" inverseEntity="PersonaEntity"/>
     </entity>
 </model>

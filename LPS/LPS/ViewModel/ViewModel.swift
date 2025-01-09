@@ -143,14 +143,18 @@ class ViewModel: ObservableObject {
             print("Usuario no encontrado.")
             return []
         }
-        
-        // Extraer los nombres de los Pokémon favoritos
-        print(user.favoritos)
-        if let favoritos = user.favoritos as? Set<PokemonFavoritoEntity> {
-            return favoritos.compactMap { $0.pokemon_name }
+
+        // Desempaqueta el 'favoritos' directamente como NSSet
+        guard let favoritosSet = user.favoritos else {
+            return []
         }
-        
-        return []
+
+        // Convierte el NSSet a un array de PokemonFavoritoEntity y mapea a los nombres
+        let favoritosArray = favoritosSet.compactMap { favorito in
+            return (favorito as? PokemonFavoritoEntity)?.pokemon_name
+        }
+
+        return favoritosArray
     }
     
     // Método para verificar si un Pokémon está en los favoritos de un usuario
