@@ -1,10 +1,3 @@
-//
-//  HealthView.swift
-//  LPS
-//
-//  Created by Aula03 on 26/11/24.
-//
-
 import UIKit
 import SwiftUI
 
