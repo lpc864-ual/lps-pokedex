@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct VistaDetalle: View {
-    let pokemon : Pokemon
+    @State var pokemon : Pokemon
     @EnvironmentObject var vm: ViewModel
     @Environment(\.presentationMode) var presentationMode
     @State private var selectedTab: Tab = .about
@@ -101,25 +101,37 @@ struct VistaDetalle: View {
                 .zIndex(1) 
             }
 
-            // Flechas de navegación y Pokémon imagen ARREGLAR FLECHAS
+            // Flechas de navegación y Pokémon imagen
             HStack {
-                Button(action: {})
-                {
+                Button(action: {
+                    Task {
+                        selectedTab = .about
+                        pokemon = await ViewModel.instance.loadPokemon(name_id: String(pokemon.id == 10001 ? 1025 : pokemon.id - 1))
+                        isFavorito = ViewModel.instance.isFavorito(username: ViewModel.instance.currentUserNickname, pokemonName: pokemon.name)
+                    }
+                }) {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 18))
                         .foregroundColor(Color.white)
                         .frame(width: 35, height: 35)
                         .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
                 }
+                .disabled(pokemon.id < 2)
                 .offset(x: -40)
-
+                
                 (isShiny ? pokemon.image_shiny : pokemon.image)
                     .resizable()
                     .scaledToFit()
                     .frame(height: 250)
                     .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
 
-                Button(action: {})
+                Button(action: {
+                    Task {
+                        selectedTab = .about
+                        pokemon = await ViewModel.instance.loadPokemon(name_id: String(pokemon.id == 1025 ? 10001 : pokemon.id + 1))
+                        isFavorito = ViewModel.instance.isFavorito(username: ViewModel.instance.currentUserNickname, pokemonName: pokemon.name)
+                    }
+                })
                 {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 18))
@@ -128,6 +140,7 @@ struct VistaDetalle: View {
                         .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 2)
                 }
                 .offset(x: 40)
+                .disabled(pokemon.id > 10276)
             }
             .offset(y: -180)
             .zIndex(3) // Sobre todo el contenido
@@ -136,7 +149,7 @@ struct VistaDetalle: View {
                 //Muestra el tipo del pokemon
                 ForEach(pokemon.types, id: \.self) { type in
                     Text(type.capitalized)
-                        .padding(4)
+                        .padding(7)
                         .background(Color(getColor(type)))
                         .cornerRadius(20)
                         .foregroundColor(.white)
@@ -209,7 +222,7 @@ struct TabContent: View {
             case .about:
                 VistaAbout(pokemon: pokemon, colorFondo: colorFondo)
             case .evolutions:
-                VistaEvolution(/*viewmodel: viewModel,*/ evolutions: pokemon.evolution_chain_id, colorFondo: colorFondo)
+                VistaEvolution(evolution_chain_id: pokemon.evolution_chain_id, colorFondo: colorFondo)
             case .moves:
                 VistaMovimientos(moves: pokemon.moves,
                                  colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "")

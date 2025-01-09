@@ -4,17 +4,16 @@ struct VistaMovimientos: View {
     var moves: [Move]
     var colorFondo: Color
     var pokemonType: String // El tipo del Pokémon
-
+    
     var body: some View {
         ScrollView{
-            
             VStack(spacing: 20) {
                 if moves.isEmpty {
-                                    // Mostrar mensaje de "No hay movimientos"
-                                    Text("No hay movimientos")
-                                        .font(.headline)
-                                        .foregroundColor(.gray)
-                                        .padding()
+                    // Mostrar mensaje de "No hay movimientos"
+                    Text("There are no moves")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                        .padding()
                 } else {
                     ForEach(moves, id: \.id) { move in
                         VStack(alignment: .leading, spacing: 10) {

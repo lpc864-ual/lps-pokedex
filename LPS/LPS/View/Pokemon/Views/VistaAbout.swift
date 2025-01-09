@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct VistaAbout: View {
-    var pokemon: Pokemon
-    var colorFondo: Color
+    let pokemon: Pokemon
+    let colorFondo: Color
     let statNameMap: [String: String] = [
         "hp": "HP",
         "attack": "ATK",
@@ -69,7 +69,8 @@ struct VistaAbout: View {
                 // Descripción
                 Text(pokemon.description)
                     .font(.body)
-                    .padding(.top, 10)
+                    .padding(.leading, 10)
+                    .padding(.trailing, 10)
                 
                 Divider()
                 

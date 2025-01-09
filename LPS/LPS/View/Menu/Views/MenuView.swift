@@ -8,8 +8,9 @@
 import SwiftUI
 
 // Función asíncrona común para manejar la lógica de filtrado con parámetros pasados por referencia
-func applyFilters(query: Binding<String>, selectedTypeFilters: Binding<[String]>, selectedGenerationFilters: Binding<Int>, isFavorito: Binding<Bool>, pokemon_names: Binding<[String]>, pokemons: Binding<[Pokemon]>, pokemon_offset: Binding<Int>, username: String
+func applyFilters(query: Binding<String>, selectedTypeFilters: Binding<[String]>, selectedGenerationFilters: Binding<Int>, isFavorito: Binding<Bool>, pokemon_names: Binding<[String]>, pokemons: Binding<[Pokemon]>, pokemon_offset: Binding<Int>, isLoading: Binding<Bool>, username: String
 ) async {
+    isLoading.wrappedValue = true
     let lastQuery = query.wrappedValue
     let lastSelectedTypeFilters = selectedTypeFilters.wrappedValue
     let lastSelectedGenerationFilters = selectedGenerationFilters.wrappedValue
@@ -38,6 +39,7 @@ func applyFilters(query: Binding<String>, selectedTypeFilters: Binding<[String]>
         pokemon_names.wrappedValue = auxPokemonNames
         pokemons.wrappedValue = auxPokemons
         pokemon_offset.wrappedValue = auxPokemons.count
+        isLoading.wrappedValue = false
     }
 }
 
@@ -50,6 +52,7 @@ struct BusquedaView: View {
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
     @Binding var isFavorito: Bool
+    @Binding var isLoading: Bool
     
     var body: some View {
         HStack {
@@ -66,7 +69,7 @@ struct BusquedaView: View {
                     .onChange(of: query) {
                         // Ejecuta los filtros en un Task asíncrono
                         Task {
-                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
+                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isLoading: $isLoading, username: vm.currentUserNickname)
                         }
                     }
             }
@@ -89,6 +92,7 @@ struct GridView: View {
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
     @Binding var isFavorito: Bool
+    @Binding var isLoading: Bool
     let isSingleSelection: Bool // Nuevo parámetro para definir si el filtro es único
     
     var body: some View {
@@ -114,7 +118,7 @@ struct GridView: View {
                                 }
                             }
                             Task {
-                                await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
+                                await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isLoading: $isLoading, username: vm.currentUserNickname)
                             }
                         }) {
                             Text(item)
@@ -192,6 +196,7 @@ struct HeaderView: View {
     
     @Binding var selectedTypeFilters: [String]
     @Binding var selectedGenerationFilters: Int
+    @Binding var isLoading: Bool
     
     var body: some View {
         VStack {
@@ -205,11 +210,11 @@ struct HeaderView: View {
             
             if (!isContinuar) {
                 HStack {
-                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito)
+                    BusquedaView(query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, isLoading: $isLoading)
                     Button {
                         isFavorito = !isFavorito
                         Task {
-                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
+                            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isLoading: $isLoading, username: vm.currentUserNickname)
                         }
                     } label: {
                         Image(systemName: $isFavorito.wrappedValue ? "heart.fill" : "heart")
@@ -261,6 +266,7 @@ struct HeaderView: View {
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
                         isFavorito: $isFavorito,
+                        isLoading: $isLoading,
                         isSingleSelection: true // Generación será de selección única
                     )
                 }
@@ -276,6 +282,7 @@ struct HeaderView: View {
                         selectedTypeFilters: $selectedTypeFilters,
                         selectedGenerationFilters: $selectedGenerationFilters,
                         isFavorito: $isFavorito,
+                        isLoading: $isLoading,
                         isSingleSelection: false // Tipos permiten selección múltiple
                     )
                 }
@@ -286,7 +293,7 @@ struct HeaderView: View {
 }
 
 struct CardView: View {
-    var pokemon: Pokemon
+    let pokemon: Pokemon
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
@@ -443,29 +450,36 @@ struct PokemonListView: View {
     @Binding var view: Int
     @Binding var pokemon_battle: [Pokemon]
     @Binding var pokemon_images: [Image]
+    @Binding var isLoading: Bool
     
     var body: some View {
         ScrollView {
-            LazyVStack {
-                // Dividimos los Pokémon en grupos de dos por cada fila
-                ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
-                    HStack {
-                        // Mostrar el primer Pokémon en la fila
-                        CardView(pokemon: pokemons[index], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                        // Mostrar el segundo Pokémon en la fila, si existe
-                        if index + 1 < pokemons.count {
-                            CardView(pokemon: pokemons[index + 1], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
-                        } else {
-                            Spacer().frame(maxWidth: 198)
+            if isLoading {
+                // Indicador de carga mientras se procesan los pokemons
+                ProgressView("Loading pokemons...")
+                    .padding()
+            } else {
+                LazyVStack {
+                    // Dividimos los Pokémon en grupos de dos por cada fila
+                    ForEach(Array(stride(from: 0, to: pokemons.count, by: 2)), id: \.self) { index in
+                        HStack {
+                            // Mostrar el primer Pokémon en la fila
+                            CardView(pokemon: pokemons[index], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            // Mostrar el segundo Pokémon en la fila, si existe
+                            if index + 1 < pokemons.count {
+                                CardView(pokemon: pokemons[index + 1], view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            } else {
+                                Spacer().frame(maxWidth: 198)
+                            }
                         }
-                    }
-                    .padding(0)
-                    .onAppear {
-                        // Si el usuario ha llegado al final del contenido actual, carga más Pokémon
-                        if index >= pokemons.count - 2 { // Detecta las últimas filas
-                            Task {
-                                pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
-                                pokemon_offset = pokemons.count
+                        .padding(0)
+                        .onAppear {
+                            // Si el usuario ha llegado al final del contenido actual, carga más Pokémon
+                            if index >= pokemons.count - 2 { // Detecta las últimas filas
+                                Task {
+                                    pokemons = await ViewModel.instance.loadMorePokemons(currentPokemons: pokemons, pokemonNames: pokemon_names, offset: pokemon_offset)
+                                    pokemon_offset = pokemons.count
+                                }
                             }
                         }
                     }
@@ -473,7 +487,7 @@ struct PokemonListView: View {
             }
         }
         .task {
-            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, username: vm.currentUserNickname)
+            await applyFilters(query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isLoading: $isLoading, username: vm.currentUserNickname)
         }
     }
 }
@@ -658,15 +672,16 @@ struct MenuView: View {
     @State var pokemon_images: [Image] = []
     
     @State var isContinuar: Bool = false
+    @State var isLoading: Bool = true
     
     var body: some View {
         NavigationView {
             if view != 3 {
                 VStack {
                     if view != 2 {
-                        HeaderView(view: $view, isFavorito: $isFavorito, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters)
+                        HeaderView(view: $view, isFavorito: $isFavorito, query: $query, pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, isContinuar: $isContinuar, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isLoading: $isLoading)
                         if (!isContinuar) {
-                            PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                            PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isLoading: $isLoading)
                         } else {
                             ForEach(pokemon_battle, id: \.id) { pokemon in
                                 CardBattleView(pokemon: pokemon, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)

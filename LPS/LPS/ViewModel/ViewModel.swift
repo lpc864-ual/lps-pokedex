@@ -216,9 +216,10 @@ class ViewModel: ObservableObject {
         }
     }
 
-    func loadPokemon(name: String) async -> Pokemon {
-        let pokemon = await pokeApi(endpoint: "pokemon/\(name)")
-        let pokemon_species = await pokeApi(endpoint: "pokemon-species/\(name)")
+    func loadPokemon(name_id: String) async -> Pokemon {
+        let pokemon = await pokeApi(endpoint: "pokemon/\(name_id)")
+        let pokemon_species = await pokeApi(endpoint: "pokemon-species/\(name_id)")
+        let name = pokemon["name"] as! String
         let id = pokemon["id"] as! Int
         var description = ""
         if let flavorTextEntries = pokemon_species["flavor_text_entries"]
@@ -270,8 +271,6 @@ class ViewModel: ObservableObject {
             evolution_chain_id = Int(
                 (species["url"] as! String).dropFirst(42).dropLast(1))!
         }
-
-        //let generation = (pokemon_species["generation"] as? [String: Any])?["name"] as? String ?? "Unknown"
         
         return Pokemon(
             id: id,
@@ -285,7 +284,6 @@ class ViewModel: ObservableObject {
             image_shiny: image_shiny,
             evolution_chain_id: evolution_chain_id,
             moves: moves
-            //generation: generation
         )
     }
 
@@ -299,7 +297,7 @@ class ViewModel: ObservableObject {
         let batchNames = Array(pokemon_names[offset..<endIndex])
         var pokemons: [Pokemon] = []
         for name in batchNames {
-            let pokemon = await loadPokemon(name: name)
+            let pokemon = await loadPokemon(name_id: name)
             pokemons.append(pokemon)
         }
         return pokemons
@@ -387,10 +385,12 @@ class ViewModel: ObservableObject {
     func loadEvolutions(evolution_chain_id: Int) async -> [(
         Pokemon, String, Pokemon
     )] {
-        var evolution_chain = [
-            ((await pokeApi(endpoint: "evolution-chain/\(evolution_chain_id)"))[
-                "chain"] as! [String: Any])
-        ]
+        var evolution_chain: [[String: Any]] = []
+        if let chainData = await pokeApi(endpoint: "evolution-chain/\(evolution_chain_id)")["chain"] as? [String: Any] {
+            evolution_chain = [chainData]
+        } else {
+            return []
+        }
         var evolutions: [(Pokemon, String, Pokemon)] = []
         while !evolution_chain.isEmpty {
             var aux: [[String: Any]] = []
@@ -400,10 +400,10 @@ class ViewModel: ObservableObject {
                     continue
                 }
                 let pokemon1 = await loadPokemon(
-                    name: (ce["species"] as! [String: Any])["name"] as! String)
+                    name_id: (ce["species"] as! [String: Any])["name"] as! String)
                 for ne in next_evolutions {
                     let pokemon2 = await loadPokemon(
-                        name: ((ne as! [String: Any])["species"]
+                        name_id: ((ne as! [String: Any])["species"]
                             as! [String: Any])["name"] as! String)
                     let details =
                         (((ne as! [String: Any])["evolution_details"] as! [Any])[
