@@ -1,10 +1,3 @@
-//
-//  MenuView.swift
-//  LPS
-//
-//  Created by Aula03 on 10/12/24.
-//
-
 import SwiftUI
 
 // Función asíncrona común para manejar la lógica de filtrado con parámetros pasados por referencia

@@ -209,7 +209,6 @@ enum Tab {
 
 // Contenido dinámico de las tabs
 struct TabContent: View {
-    //var viewModel : ViewModel
     @Binding var selectedTab: Tab
     let pokemon: Pokemon
     var colorFondo: Color {
@@ -224,8 +223,7 @@ struct TabContent: View {
             case .evolutions:
                 VistaEvolution(evolution_chain_id: pokemon.evolution_chain_id, colorFondo: colorFondo)
             case .moves:
-                VistaMovimientos(moves: pokemon.moves,
-                                 colorFondo: colorFondo, pokemonType: pokemon.types.first ?? "")
+                VistaMovimientos(pokemon_id: pokemon.id, colorFondo: colorFondo)
             }
         }
     }

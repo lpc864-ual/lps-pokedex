@@ -12,8 +12,6 @@ struct Pokemon: Identifiable, Equatable {
     let image: Image
     let image_shiny: Image
     let evolution_chain_id: Int
-    let moves: [Move]
-    //let generation: String
 }
 
 struct Move: Identifiable, Equatable {
@@ -282,8 +280,7 @@ class ViewModel: ObservableObject {
             stats: stats,
             image: image,
             image_shiny: image_shiny,
-            evolution_chain_id: evolution_chain_id,
-            moves: moves
+            evolution_chain_id: evolution_chain_id
         )
     }
 
@@ -422,7 +419,9 @@ class ViewModel: ObservableObject {
                             + String(
                                 (details["item"] as! [String: Any])["name"]
                                     as! String)
-                    }  // else if...
+                    } else {
+                        tag = "Other"
+                    }
                     evolutions.append((pokemon1, tag, pokemon2))
                     aux.append(ne as! [String: Any])
                 }
@@ -432,18 +431,23 @@ class ViewModel: ObservableObject {
         return evolutions
     }
 
-    func loadMoreMoves() async {
-        guard move_offset < move_names.count else {
-            return
+    func loadMoreMoves(
+        currentMoves: [Move],
+        moveNames: [String],
+        offset: Int,
+        limit: Int = 10
+    ) async -> [Move] {
+        guard offset < moveNames.count else {
+            return []
         }
-        let newMoves = await listMoves(
-            move_names: move_names, offset: move_offset, limit: 10)
+        var newMoves = await listMoves(
+            move_names: moveNames, offset: offset, limit: limit)
         if !newMoves.isEmpty {
             DispatchQueue.main.async {
-                self.moves.append(contentsOf: newMoves)
-                self.move_offset += newMoves.count
+                newMoves.append(contentsOf: currentMoves)
             }
         }
+        return newMoves
     }
 
     func loadMoves(pokemon_id: Int) async -> [String] {
