@@ -1,6 +1,11 @@
 import UIKit
 import SwiftUI
 
+// GUILLERMO: Usar TeamsData y acceder a sus valores
+// Que por defecto cambie a posicion horizontal automaticamente
+// Junto con Alberto conseguir lo de las compilaciones separadas para el listado de pokemones y batalla (usar target: cualquier cosa preguntar a Luis o a Pablo)
+// Hacer presentacion ppt (un par de capturas de pantalla del proceso realizado. Cualquier duda preguntar a Luis)
+
 extension UIDevice {
     static func setOrientation(_ orientation: UIInterfaceOrientation) {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }

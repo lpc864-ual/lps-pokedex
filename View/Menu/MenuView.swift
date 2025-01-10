@@ -361,9 +361,9 @@ struct CardView: View {
 //GUILLERMO: ENCARGADO DE TERMINARLO Y DEJARLO COMO EL FIGMA
 struct CardBattleView: View {
     var pokemon: Pokemon
-    @Binding var view: Int
-    @Binding var pokemon_battle: [Pokemon]
-    @Binding var pokemon_images: [Image]
+    //@Binding var view: Int
+    //@Binding var pokemon_battle: [Pokemon]
+    //@Binding var pokemon_images: [Image]
     
     // Función para construir el nombre del color
     private func getTypeColorName(_ type: String?) -> String {
@@ -386,7 +386,7 @@ struct CardBattleView: View {
                 VStack {
                     ForEach(pokemon.types, id: \.self) { type in
                         Text(type)
-                            .frame(width: 60, height: 30)
+                            .frame(width: 240, height: 30)
                             .font(.system(size: 12))
                             .fontWeight(.medium)
                             .foregroundStyle(.white)
@@ -403,20 +403,12 @@ struct CardBattleView: View {
                 }
                 ZStack {
                     Image("pokeball_bg")
-                    pokemon.image.resizable().scaledToFit().frame(
-                        width: 90, height: 100)
-                    if (view == 0) {
-                        //BOTON DE AGREGAR POKEMON
-                        Button(action: {
-                            if (pokemon_images.count != 3) {
-                                pokemon_images.append(pokemon.image)
-                            }
-                        }){
-                            Image("addPoke")
-                                .padding([.top, .leading], 50.0)
-                        }
+                    pokemon.image.resizable().scaledToFit().frame(width: 90, height: 100)
+                    // GUILLERMO: usar propieda move de pokemon (pokemon.move) para mostrar el movimiento escogido. (¡Propidad opcional! Te saltara error, pero no te rayes. Dile al chat para que te lo solucione)
+                    
+                    //if (view == 0) {
                         
-                    }
+                    //}
                 }
                 .offset(x: 17, y: 20)
             }
@@ -523,8 +515,6 @@ struct ProfileView: View {
                     .background(Circle().fill(Color.red))
                     .padding()
             }
-            
-            
             Spacer()
         }
         
@@ -536,6 +526,29 @@ struct BattleFooterView: View {
     @Binding var pokemon_images: [Image]
     @Binding var isContinuar: Bool // Propiedad de estado
     //@Binding var isEmpezar: Bool // Propiedad de estado
+    @Binding var pokemons: [Pokemon]
+    
+    // Función asincrónica para cargar y asignar un movimiento aleatorio
+    func loadAndAssignMove(to pokemon: Pokemon) {
+        Task {
+            // Primero obtenemos los movimientos posibles (newMoves)
+            let newMoves = await ViewModel.instance.loadMoves(pokemon_id: pokemon.id)
+            
+            // Verificamos si newMoves tiene elementos
+            if !newMoves.isEmpty {
+                // Seleccionamos un movimiento aleatorio de los movimientos disponibles
+                let randomMoveName = newMoves.randomElement()!
+                
+                // Ahora usamos el nombre del movimiento para obtener el objeto Move
+                let move = await ViewModel.instance.loadMove(name: randomMoveName)
+                
+                // Actualizamos el Pokémon con el movimiento
+                if let index = pokemon_battle.firstIndex(where: { $0.id == pokemon.id }) {
+                    pokemon_battle[index].move = move
+                }
+            }
+        }
+    }
     
     var body: some View {
         VStack {
@@ -577,11 +590,24 @@ struct BattleFooterView: View {
                                     .frame(width: 40, height: 40)
                             }
                             
-                            // GUILLERMO: CORREGIR FALLO AL NAVEGAR AL BATTLEVIEW (PETA)
                             NavigationLink(destination: BattleView()) {
-                                Image("start")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
+                                Button(action: {
+                                    // Nuestro equipo
+                                    TeamsData.updatePlayerTeam(pokemonBattle: pokemon_battle)
+                                    // Equipo Rival
+                                    let rivalTeam = pokemons.shuffled().prefix(3)
+                                    for pokemon in rivalTeam {
+                                        Task {
+                                                await loadAndAssignMove(to: pokemon)
+                                            }
+                                    }
+                                    
+                                    TeamsData.updateRivalTeam(pokemons: pokemons)
+                                }) {
+                                    Image("start")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                }
                             }
                         }
                     }
@@ -660,13 +686,13 @@ struct MenuView: View {
     @State var pokemon_names: [String] = []
     @State var pokemons: [Pokemon] = []
     @State var pokemon_offset: Int = 0
-    
+
     @State var pokemon_battle: [Pokemon] = []
     @State var pokemon_images: [Image] = []
-    
+
     @State var isContinuar: Bool = false
     @State var isLoading: Bool = true
-    
+
     var body: some View {
         NavigationView {
             if view != 3 {
@@ -677,12 +703,16 @@ struct MenuView: View {
                             PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isLoading: $isLoading)
                         } else {
                             ForEach(pokemon_battle, id: \.id) { pokemon in
-                                CardBattleView(pokemon: pokemon, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images)
+                                // Llamamos a loadMoves cuando el Pokémon aparece en la vista
+                                CardBattleView(pokemon: pokemon)
+                                    .onAppear {
+                                        loadAndAssignMove(to: pokemon)
+                                    }
                             }
                         }
-                        
-                        if (view == 0) {
-                            BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar)
+
+                        if view == 0 {
+                            BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar, pokemons: $pokemons)
                         }
                     } else {
                         ProfileView(view: $view)
@@ -692,17 +722,36 @@ struct MenuView: View {
                 }
                 .navigationBarBackButtonHidden(true)
             } else {
-                // Eliminamos el padding implícito con ZStack
                 ZStack {
                     SignInView()
-                        .edgesIgnoringSafeArea(.all) // Elimina cualquier margen o padding no deseado
+                        .edgesIgnoringSafeArea(.all)
                 }
             }
         }
         .navigationBarBackButtonHidden(true)
     }
+    // Función asincrónica para cargar y asignar un movimiento aleatorio
+    func loadAndAssignMove(to pokemon: Pokemon) {
+        Task {
+            // Primero obtenemos los movimientos posibles (newMoves)
+            let newMoves = await ViewModel.instance.loadMoves(pokemon_id: pokemon.id)
+            
+            // Verificamos si newMoves tiene elementos
+            if !newMoves.isEmpty {
+                // Seleccionamos un movimiento aleatorio de los movimientos disponibles
+                let randomMoveName = newMoves.randomElement()!
+                
+                // Ahora usamos el nombre del movimiento para obtener el objeto Move
+                let move = await ViewModel.instance.loadMove(name: randomMoveName)
+                
+                // Actualizamos el Pokémon con el movimiento
+                if let index = pokemon_battle.firstIndex(where: { $0.id == pokemon.id }) {
+                    pokemon_battle[index].move = move
+                }
+            }
+        }
+    }
 }
-
 
 struct MenuView_Previews: PreviewProvider {
     static var previews: some View {

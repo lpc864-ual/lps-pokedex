@@ -12,6 +12,7 @@ struct Pokemon: Identifiable, Equatable {
     let image: Image
     let image_shiny: Image
     let evolution_chain_id: Int
+    var move: Move? = nil
 }
 
 struct Move: Identifiable, Equatable {

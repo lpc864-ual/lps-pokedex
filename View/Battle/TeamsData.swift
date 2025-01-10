@@ -2,24 +2,30 @@ import Foundation
 
 // Estructura que representa un Pokémon
 struct Team {
-    let name: String
-    let frontImage: String  // Nombre del archivo de imagen frontal
+    let pokemon: Pokemon
     let backImage: String   // Nombre del archivo de imagen trasera
-    let attackPower: Int    // Potencia de ataque
-    let attackAccuracy: Int // Precisión del ataque (porcentaje 0-100)
 }
 
 // Datos de los equipos
 struct TeamsData {
-    static let playerTeam: [Team] = [
-        Team(name: "Pikachu", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 50, attackAccuracy: 90),
-        Team(name: "Charizard", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 70, attackAccuracy: 85),
-        Team(name: "Bulbasaur", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 40, attackAccuracy: 95)
-    ]
+    static var playerTeam: [Team] = []
+    static var rivalTeam: [Team] = []
     
-    static let rivalTeam: [Team] = [
-        Team(name: "Squirtle", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 45, attackAccuracy: 90),
-        Team(name: "Gengar", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 65, attackAccuracy: 80),
-        Team(name: "Onix", frontImage: "bulbasur", backImage: "wartortleBack", attackPower: 60, attackAccuracy: 75)
-    ]
+    static func updatePlayerTeam(pokemonBattle: [Pokemon])  {
+        // Crear un nuevo equipo dinámico basado en las selecciones
+        for pokemon in pokemonBattle {
+            //
+            let newTeamMember = Team(pokemon: pokemon, backImage: "wartortleBack")
+            
+            TeamsData.playerTeam.append(newTeamMember)
+        }
+    }
+    
+    static func updateRivalTeam(pokemons: [Pokemon]) {
+        for pokemon in pokemons {
+            let newRivalMember = Team(pokemon: pokemon, backImage: "wartortleBack")
+            
+            TeamsData.rivalTeam.append(newRivalMember)
+        }
+    }
 }
