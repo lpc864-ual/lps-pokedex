@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "pokeball_bg.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
