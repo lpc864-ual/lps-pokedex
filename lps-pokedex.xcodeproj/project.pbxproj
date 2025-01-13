@@ -29,9 +29,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		357D67AE2D302884006759DC /* lps-pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = "lps-pokedex.app"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app"; sourceTree = "<absolute>"; };
-		357D67AF2D302884006759DC /* lps-pokedexTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexTests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedex.app/PlugIns/lps-pokedexTests.xctest"; sourceTree = "<absolute>"; };
-		357D67B02D302884006759DC /* lps-pokedexUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "lps-pokedexUITests.xctest"; path = "/Users/Aula03/Documents/lps-pokedex/build/Debug-iphoneos/lps-pokedexUITests-Runner.app/PlugIns/lps-pokedexUITests.xctest"; sourceTree = "<absolute>"; };
+		3585A1AA2D352086004B011A /* lps-pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lps-pokedex.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3585A1AB2D352086004B011A /* lps-pokedexTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "lps-pokedexTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3585A1AC2D352086004B011A /* lps-pokedexUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "lps-pokedexUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		35A0BD402D30106C00BEB806 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		35A0BD412D30106C00BEB806 /* LPSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LPSApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -102,6 +102,9 @@
 				35A0BD6C2D301B9000BEB806 /* View */,
 				35A0BD402D30106C00BEB806 /* Assets.xcassets */,
 				35A0BD412D30106C00BEB806 /* LPSApp.swift */,
+				3585A1AA2D352086004B011A /* lps-pokedex.app */,
+				3585A1AB2D352086004B011A /* lps-pokedexTests.xctest */,
+				3585A1AC2D352086004B011A /* lps-pokedexUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -127,7 +130,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPS;
-			productReference = 357D67AE2D302884006759DC /* lps-pokedex.app */;
+			productReference = 3585A1AA2D352086004B011A /* lps-pokedex.app */;
 			productType = "com.apple.product-type.application";
 		};
 		35E2DAA32CE3B5E5008A5986 /* lps-pokedexTests */ = {
@@ -147,7 +150,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPSTests;
-			productReference = 357D67AF2D302884006759DC /* lps-pokedexTests.xctest */;
+			productReference = 3585A1AB2D352086004B011A /* lps-pokedexTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		35E2DAAD2CE3B5E5008A5986 /* lps-pokedexUITests */ = {
@@ -167,7 +170,7 @@
 			packageProductDependencies = (
 			);
 			productName = LPSUITests;
-			productReference = 357D67B02D302884006759DC /* lps-pokedexUITests.xctest */;
+			productReference = 3585A1AC2D352086004B011A /* lps-pokedexUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */

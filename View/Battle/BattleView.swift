@@ -6,13 +6,6 @@ import SwiftUI
 // Junto con Alberto conseguir lo de las compilaciones separadas para el listado de pokemones y batalla (usar target: cualquier cosa preguntar a Luis o a Pablo)
 // Hacer presentacion ppt (un par de capturas de pantalla del proceso realizado. Cualquier duda preguntar a Luis)
 
-extension UIDevice {
-    static func setOrientation(_ orientation: UIInterfaceOrientation) {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { return }
-        windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientation == .landscapeRight ? .landscapeRight : .landscapeLeft))
-    }
-}
-
 struct BattleView: View {
     @State private var rivalHP: CGFloat = 1000
     private let rivalTotalHP: CGFloat = 1000
@@ -23,6 +16,14 @@ struct BattleView: View {
     @State private var isPlayerTurn: Bool = true
     @State private var currentPhase: Int = 1
     @State private var isBattleActive: Bool = true
+    
+    @State private var isLeaveConfirm = false
+    
+    // Accedemos a los equipos desde TeamsData
+    var playerTeam: [Pokemon] = TeamsData.playerTeam
+    
+    var rivalTeam: [Pokemon] = TeamsData.rivalTeam
+    
 
     var body: some View {
         ZStack {
@@ -109,12 +110,12 @@ struct BattleView: View {
                     VStack{
                         Spacer()
                         HStack{
-                            
-                            //AQUI VIENEN LOS SPRITES DEL EQUIPO RIVAL
-                            Image("bulbasur")
-                            Image("bulbasur")
-                            Image("bulbasur")
-                        
+                            ForEach(rivalTeam, id: \.id) { pokemon in
+                                pokemon.image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50, height: 50) // Ajusta el tamaño según lo necesites
+                            }
                         }
                     }.padding(.trailing, 10.0)
                     
@@ -123,10 +124,14 @@ struct BattleView: View {
                 HStack {
                     
                     HStack{
-                        //AQUI VIENEN LOS SPRITES DE LOS POKES ELEGIDOS POR EL JUGADOR
-                        Image("wartortleBack")
-                        Image("wartortleBack")
-                        Image("wartortleBack")
+                        // Usar las imágenes de los Pokémon del equipo del jugador
+                        ForEach(playerTeam, id: \.id) { pokemon in
+                            pokemon.image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 50, height: 50) // Ajusta el tamaño según lo necesites
+                        }
+
                     }
                     .padding(.leading)
                     
@@ -201,6 +206,8 @@ struct BattleView: View {
                     .onTapGesture {
                         if isBattleActive {
                             performBattlePhase()
+                        }else{
+                            isLeaveConfirm = true
                         }
                     }
             }
@@ -208,11 +215,18 @@ struct BattleView: View {
             .alert("Leave Battle", isPresented: $showLeaveAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Confirm", role: .destructive) {
+                    isLeaveConfirm = true
                     print("El usuario ha confirmado salir de la batalla.")
                 }
             } message: {
                 Text("Are you sure you want to leave the battle?")
             }
+            
+            NavigationLink(
+                destination: MenuView(),
+                isActive: $isLeaveConfirm,
+                label: { EmptyView() }
+            )
         }
     }
 
@@ -228,7 +242,7 @@ struct BattleView: View {
                 rivalHP -= CGFloat(damage)
                 combatText = "Your team attacks and deals \(damage) damage!"
             } else {
-                combatText = "Your team attacks but misses!"
+                combatText = "Your team attacks, but misses!"
             }
             currentPhase = 2
         } else {
@@ -236,7 +250,7 @@ struct BattleView: View {
                 playerHP -= CGFloat(damage)
                 combatText = "The rival team attacks and deals \(damage) damage!"
             } else {
-                combatText = "The rival team attacks but misses!"
+                combatText = "The rival team attacks, but misses!"
             }
             currentPhase = 1
         }
@@ -257,5 +271,3 @@ struct BattleView_Previews: PreviewProvider {
         BattleView()
     }
 }
-
-
