@@ -493,7 +493,7 @@ class ViewModel: ObservableObject {
                     .replacingOccurrences(of: "\u{0C}", with: " ")
             }
         }
-        let accuracy = info["accuracy"] as? Int ?? 0
+        let accuracy = info["accuracy"] as? Int ?? 100
         let power = info["power"] as? Int ?? 0
         return Move(
             id: id,
@@ -503,65 +503,4 @@ class ViewModel: ObservableObject {
             power: power
         )
     }
-
-    /*
-    var body: some View {
-        ScrollView {
-            LazyVStack {
-                ForEach(moves) { move in
-                    VStack {
-                        Text(move.name)
-                            .font(.headline)
-                        Text(move.description)
-                            .font(.subheadline)
-                        Text(String(move.accuracy))
-                            .font(.subheadline)
-                        Text(String(move.power))
-                            .font(.subheadline)
-                    }
-                    .onAppear {
-                        if move == moves.dropLast().last {
-                            Task {
-                                await loadMoreMoves()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .task {
-            move_names = await loadMoves(pokemon_id: 1)
-            moves = await listMoves(move_names: move_names, offset: move_offset, limit: 10)
-            move_offset += 10
-        }
-        ScrollView {
-            LazyVStack {
-                ForEach(pokemons) { pokemon in
-                    VStack {
-                        pokemon.image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                        Text(pokemon.name)
-                            .font(.headline)
-                        Text(pokemon.description)
-                            .font(.subheadline)
-                    }
-                    .onAppear {
-                        if pokemon == pokemons.dropLast().last {
-                            Task {
-                                await loadMorePokemons()
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .task {
-            pokemon_names = await filterPokemons(searchQuery: "a", typeFilter: ["flying", "fire"], generationFilter: 1)
-            pokemons = await listPokemons(pokemon_names: pokemon_names, offset: pokemon_offset, limit: 10)
-            pokemon_offset += 10
-        }
-    }
-*/
 }

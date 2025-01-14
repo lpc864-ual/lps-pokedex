@@ -1,16 +1,39 @@
 import UIKit
 import SwiftUI
 
-// GUILLERMO: Usar TeamsData y acceder a sus valores
-// Que por defecto cambie a posicion horizontal automaticamente
-// Junto con Alberto conseguir lo de las compilaciones separadas para el listado de pokemones y batalla (usar target: cualquier cosa preguntar a Luis o a Pablo)
-// Hacer presentacion ppt (un par de capturas de pantalla del proceso realizado. Cualquier duda preguntar a Luis)
-
 struct BattleView: View {
-    @State private var rivalHP: CGFloat = 1000
-    private let rivalTotalHP: CGFloat = 1000
-    @State private var playerHP: CGFloat = 1000
-    private let playerTotalHP: CGFloat = 1000
+    var playerTeam: [Pokemon]
+    var rivalTeam: [Pokemon]
+    @State private var playerHP: Int = 1000
+    private let playerTotalHP: Int = 1000
+    private var playerPowerSum: Int {
+            playerTeam.reduce(0) { sum, pokemon in
+                sum + (pokemon.move?.power ?? 0)
+            }
+        }
+    private var playerAccuracyAvg: CGFloat {
+            let totalAccuracy = playerTeam.reduce(0) { sum, pokemon in
+                sum + (pokemon.move?.accuracy ?? 0)
+            }
+            let moveCount = playerTeam.filter { $0.move?.accuracy != nil }.count
+            return moveCount > 0 ? CGFloat(totalAccuracy) / CGFloat(moveCount) : 0.0
+        }
+    
+    @State private var rivalHP: Int = 1000
+    private let rivalTotalHP: Int = 1000
+    private var rivalPowerSum: Int {
+            rivalTeam.reduce(0) { sum, pokemon in
+                sum + (pokemon.move?.power ?? 0)
+            }
+        }
+    private var rivalAccuracyAvg: CGFloat {
+            let totalAccuracy = rivalTeam.reduce(0) { sum, pokemon in
+                sum + (pokemon.move?.accuracy ?? 0)
+            }
+            let moveCount = rivalTeam.filter { $0.move?.accuracy != nil }.count
+            return moveCount > 0 ? CGFloat(totalAccuracy) / CGFloat(moveCount) : 0.0
+        }
+    
     @State private var showLeaveAlert: Bool = false
     @State private var combatText: String = "The battle begins!"
     @State private var isPlayerTurn: Bool = true
@@ -18,12 +41,6 @@ struct BattleView: View {
     @State private var isBattleActive: Bool = true
     
     @State private var isLeaveConfirm = false
-    
-    // Accedemos a los equipos desde TeamsData
-    var playerTeam: [Pokemon] = TeamsData.playerTeam
-    
-    var rivalTeam: [Pokemon] = TeamsData.rivalTeam
-    
 
     var body: some View {
         ZStack {
@@ -50,13 +67,13 @@ struct BattleView: View {
                                         .font(.headline)
                                         .foregroundColor(.black)
 
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 10)
+                                    ZStack (alignment: .leading) {
+                                        RoundedRectangle(cornerRadius: 10)  //Barra de fondo vida rival
                                             .fill(Color.green.opacity(0.3))
                                             .frame(width: 200, height: 10)
-                                        RoundedRectangle(cornerRadius: 10)
+                                        RoundedRectangle(cornerRadius: 10)  //Barra vida rival
                                             .fill(Color.green)
-                                            .frame(width: CGFloat(rivalHP / rivalTotalHP) * 200, height: 10)
+                                            .frame(width: CGFloat(CGFloat(rivalHP) / CGFloat(rivalTotalHP)) * 200, height: 10)
                                         }
 
                                     HStack {
@@ -108,32 +125,31 @@ struct BattleView: View {
                     Spacer()
                     
                     VStack{
-                        Spacer()
                         HStack{
+                            //Muestra imagenes del equipo rival
                             ForEach(rivalTeam, id: \.id) { pokemon in
                                 pokemon.image
                                     .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 50, height: 50) // Ajusta el tamaño según lo necesites
+                                    .frame(width: 100, height: 100) // Ajusta el tamaño de los pokemon
                             }
                         }
-                    }.padding(.trailing, 10.0)
+                    }
+                    .padding(.trailing, 20.0)
+                    .padding(.top, 100.0)
                     
                 }
         
                 HStack {
-                    
                     HStack{
-                        // Usar las imágenes de los Pokémon del equipo del jugador
+                        // Muestra imagenes del equipo jugador
                         ForEach(playerTeam, id: \.id) { pokemon in
                             pokemon.image
                                 .resizable()
-                                .scaledToFit()
-                                .frame(width: 50, height: 50) // Ajusta el tamaño según lo necesites
+                                .frame(width: 100, height: 100) // Ajusta el tamaño de los pokemon
                         }
-
                     }
                     .padding(.leading)
+                    .padding(.bottom, 10)
                     
                     Spacer()
 
@@ -148,15 +164,14 @@ struct BattleView: View {
                                         .font(.headline)
                                         .foregroundColor(.black)
 
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 10)
+                                    ZStack (alignment: .leading) {
+                                        RoundedRectangle(cornerRadius: 10)  //Barra fondo vida Jugador
                                             .fill(Color.green.opacity(0.3))
                                             .frame(width: 200, height: 10)
-                                        RoundedRectangle(cornerRadius: 10)
+                                        RoundedRectangle(cornerRadius: 10)  //Barra vida Jugador
                                             .fill(Color.green)
-                                            .frame(width: CGFloat(playerHP / playerTotalHP) * 200, height: 10)
+                                            .frame(width: CGFloat(CGFloat(playerHP) / CGFloat(playerTotalHP)) * 200, height: 10)
                                     }
-
                                     HStack {
                                         if (playerHP >= 0){
                                             Text("\(Int(playerHP))/\(Int(playerTotalHP))")
@@ -234,21 +249,22 @@ struct BattleView: View {
     private func performBattlePhase() {
         guard isBattleActive else { return }
         
-        //AQUI SE DEBE TOMAR LOS VALORES DE AMBOS EQUIPOS PARA EL DAÑO Y LA PROBABILIDAD
+        let accuracyCheck = CGFloat.random(in: 0...100)
         
-        let damage = Int.random(in: 0...100) <= 85 ? 90 : 0 // 85% de probabilidad de acierto
         if currentPhase == 1 {
-            if damage > 0 {
-                rivalHP -= CGFloat(damage)
-                combatText = "Your team attacks and deals \(damage) damage!"
+            // Turno del jugador
+            if accuracyCheck <= playerAccuracyAvg {
+                rivalHP -= playerPowerSum
+                combatText = "Your team attacks and deals \(playerPowerSum) damage!"
             } else {
                 combatText = "Your team attacks, but misses!"
             }
             currentPhase = 2
         } else {
-            if damage > 0 {
-                playerHP -= CGFloat(damage)
-                combatText = "The rival team attacks and deals \(damage) damage!"
+            // Turno del rival
+            if accuracyCheck <= rivalAccuracyAvg {
+                playerHP -= rivalPowerSum
+                combatText = "The rival team attacks and deals \(rivalPowerSum) damage!"
             } else {
                 combatText = "The rival team attacks, but misses!"
             }
@@ -264,10 +280,11 @@ struct BattleView: View {
             isBattleActive = false
         }
     }
+
 }
 
 struct BattleView_Previews: PreviewProvider {
     static var previews: some View {
-        BattleView()
+        BattleView(playerTeam: [], rivalTeam: [])
     }
 }

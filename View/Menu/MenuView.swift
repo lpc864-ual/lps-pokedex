@@ -361,12 +361,12 @@ struct CardView: View {
 
 struct CardBattleView: View {
     var pokemon: Pokemon
-
+    
     private func getTypeColorName(_ type: String?) -> String {
         guard let type = type else { return "defaultColor" }
         return type.lowercased() + "Color"
     }
-
+    
     var body: some View {
         VStack {
             // Nombre y número del Pokémon
@@ -378,7 +378,7 @@ struct CardBattleView: View {
                 Text("#" + String(format: "%04d", pokemon.id))
                     .foregroundStyle(.black.opacity(1))
             }
-
+            
             HStack(alignment: .top, spacing: 16) {
                 // Tipos del Pokémon
                 VStack(alignment: .leading, spacing: 8) {
@@ -402,13 +402,13 @@ struct CardBattleView: View {
                             )
                     }
                 }
-
+                
                 // Imagen del Pokémon
                 pokemon.image
                     .resizable()
                     .scaledToFit()
                     .frame(width: 90, height: 100)
-
+                
                 // Movimiento, potencia y precisión
                 VStack(alignment: .leading, spacing: 8) {
                     if let move = pokemon.move {
@@ -549,23 +549,12 @@ struct ProfileView: View {
 
 struct BattleFooterView: View {
     @Binding var pokemon_battle: [Pokemon]
+    @State var rivalTeam: [Pokemon] = []
     @Binding var pokemon_images: [Image]
     @Binding var isContinuar: Bool
     @Binding var pokemons: [Pokemon]
+    @Binding var pokemon_names: [String]
     
-    func loadAndAssignMove(to pokemon: Pokemon) {
-        Task {
-            let newMoves = await ViewModel.instance.loadMoves(pokemon_id: pokemon.id)
-            if !newMoves.isEmpty {
-                let randomMoveName = newMoves.randomElement()!
-                let move = await ViewModel.instance.loadMove(name: randomMoveName)
-                if let index = pokemon_battle.firstIndex(where: { $0.id == pokemon.id }) {
-                    pokemon_battle[index].move = move
-                }
-            }
-        }
-    }
-
     var body: some View {
         VStack {
             HStack {
@@ -602,22 +591,17 @@ struct BattleFooterView: View {
                                     .frame(width: 40, height: 40)
                             }
                             Spacer()
+                            
                             // `NavigationLink` para redirigir a la `BattleView`
-                            NavigationLink(destination: BattleView()) {
+                            NavigationLink(destination: BattleView(playerTeam: pokemon_battle, rivalTeam: rivalTeam)) {
                                 Image("start")
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
                         }
-                        .task {
-                            TeamsData.updatePlayerTeam(pokemonBattle: pokemon_battle)
-                            print("Cargados pokemones team")
-                            TeamsData.updateRivalTeam(pokemons: pokemons)
-                            print("Cargados pokemones rival")
-                        }
                     }
                 }
-
+                
                 // Botón de continuar
                 if !isContinuar {
                     Button(action: {
@@ -631,24 +615,37 @@ struct BattleFooterView: View {
                     .disabled(pokemon_images.count != 3)
                 }
             }
-        
-            }
-            .frame(maxWidth: .infinity)
-            .background(Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0))
-            //Linea negra
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.black)
-                .frame(height: 2)
-                
+            
         }
+        .task {
+            let randomPokemonNames = await ViewModel.instance.filterPokemons().shuffled().prefix(3)
+            rivalTeam = await [ViewModel.instance.loadPokemon(name_id: randomPokemonNames[0]),
+                                   ViewModel.instance.loadPokemon(name_id: randomPokemonNames[1]),
+                                   ViewModel.instance.loadPokemon(name_id: randomPokemonNames[2])]
+            for index in rivalTeam.indices {
+                let newMoves = await ViewModel.instance.loadMoves(pokemon_id: rivalTeam[index].id)
+                if !newMoves.isEmpty {
+                    rivalTeam[index].move = await ViewModel.instance.loadMove(name: newMoves.randomElement()!)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .background(Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0))
+        //Linea negra
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color.black)
+            .frame(height: 2)
+        
     }
-
+}
 
 struct FooterView: View {
     @Binding var view: Int
+    
     var body: some View {
         HStack(spacing: 80) {
             // Boton de batallas
+            
             Button(action: {
                 view = 0
             }) {
@@ -693,13 +690,13 @@ struct MenuView: View {
     @State var pokemon_names: [String] = []
     @State var pokemons: [Pokemon] = []
     @State var pokemon_offset: Int = 0
-
+    
     @State var pokemon_battle: [Pokemon] = []
     @State var pokemon_images: [Image] = []
-
+    
     @State var isContinuar: Bool = false
     @State var isLoading: Bool = true
-
+    
     var body: some View {
         NavigationView {
             if view != 3 {
@@ -709,17 +706,24 @@ struct MenuView: View {
                         if (!isContinuar) {
                             PokemonListView(pokemon_names: $pokemon_names, pokemons: $pokemons, pokemon_offset: $pokemon_offset, query: $query, selectedTypeFilters: $selectedTypeFilters, selectedGenerationFilters: $selectedGenerationFilters, isFavorito: $isFavorito, view: $view, pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isLoading: $isLoading)
                         } else {
-                            ForEach(pokemon_battle, id: \.id) { pokemon in
+                            ForEach(pokemon_battle.indices, id: \.self) { index in
                                 // Llamamos a loadMoves cuando el Pokémon aparece en la vista
-                                CardBattleView(pokemon: pokemon)
+                                CardBattleView(pokemon: pokemon_battle[index])
                                     .onAppear {
-                                        loadAndAssignMove(to: pokemon)
+                                        Task {
+                                            // Primero obtenemos los movimientos posibles (newMoves)
+                                            let newMoves = await ViewModel.instance.loadMoves(pokemon_id: pokemon_battle[index].id)
+                                            // Verificamos si newMoves tiene elementos
+                                            if !newMoves.isEmpty {
+                                                pokemon_battle[index].move = await ViewModel.instance.loadMove(name: newMoves.randomElement()!)
+                                            }
+                                        }
                                     }
                             }
                         }
-
+                        
                         if view == 0 {
-                            BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar, pokemons: $pokemons)
+                            BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar, pokemons: $pokemons, pokemon_names: $pokemon_names)
                         }
                     } else {
                         ProfileView(view: $view)
@@ -736,27 +740,6 @@ struct MenuView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
-    }
-    // Función asincrónica para cargar y asignar un movimiento aleatorio
-    func loadAndAssignMove(to pokemon: Pokemon) {
-        Task {
-            // Primero obtenemos los movimientos posibles (newMoves)
-            let newMoves = await ViewModel.instance.loadMoves(pokemon_id: pokemon.id)
-            
-            // Verificamos si newMoves tiene elementos
-            if !newMoves.isEmpty {
-                // Seleccionamos un movimiento aleatorio de los movimientos disponibles
-                let randomMoveName = newMoves.randomElement()!
-                
-                // Ahora usamos el nombre del movimiento para obtener el objeto Move
-                let move = await ViewModel.instance.loadMove(name: randomMoveName)
-                
-                // Actualizamos el Pokémon con el movimiento
-                if let index = pokemon_battle.firstIndex(where: { $0.id == pokemon.id }) {
-                    pokemon_battle[index].move = move
-                }
-            }
-        }
     }
 }
 

@@ -43,7 +43,6 @@
 				Authentication/SignInView.swift,
 				Authentication/SignUpView.swift,
 				Battle/BattleView.swift,
-				Battle/TeamsData.swift,
 				Menu/MenuView.swift,
 				Pokemon/VistaAbout.swift,
 				Pokemon/VistaDetalle.swift,
