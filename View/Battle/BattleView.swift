@@ -215,6 +215,7 @@ struct BattleView: View {
                                     .font(.caption)
                                     .foregroundColor(.gray)
                                     .padding()
+                                    .offset(x:320, y:-30)
                                 
                         }
                     )

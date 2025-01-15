@@ -571,7 +571,7 @@ struct BattleFooterView: View {
                                 pokemon_images.remove(at: index)
                             }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.red)
                                     .background(Color.white)
                                     .clipShape(Circle())
                             }
@@ -580,6 +580,8 @@ struct BattleFooterView: View {
                     }
                 } else {
                     VStack {
+                        Spacer() // Empuja el HStack hacia la parte inferior
+                        
                         HStack {
                             // Botón para volver a la selección de Pokémon
                             Button(action: {
@@ -590,20 +592,22 @@ struct BattleFooterView: View {
                                     .rotationEffect(.degrees(180))
                                     .frame(width: 40, height: 40)
                             }
-                            Spacer()
+                            
+                            Spacer() // Empuja los botones hacia los extremos
                             
                             // `NavigationLink` para redirigir a la `BattleView`
-                            
                             NavigationLink(destination: BattleView(playerTeam: pokemon_battle, rivalTeam: rivalTeam)) {
                                 Image("start")
                                     .resizable()
                                     .frame(width: 40, height: 40)
                             }
                         }
+                        .padding(.horizontal, 20) // Añade márgenes laterales
                     }
+                    
                 }
                 
-                // Botón de continuar
+                //Botón de continuar
                 if !isContinuar {
                     Button(action: {
                         isContinuar.toggle()
@@ -616,6 +620,10 @@ struct BattleFooterView: View {
                     .disabled(pokemon_images.count != 3)
                 }
             }
+            //LINEA NEGRA SEPARADOR
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.black)
+                .frame(height: 2)
             
         }
         .task {
@@ -632,11 +640,6 @@ struct BattleFooterView: View {
         }
         .frame(maxWidth: .infinity)
         .background(Color(red: 239.0 / 255.0, green: 239.0 / 255.0, blue: 239.0 / 255.0))
-        //Linea negra
-        RoundedRectangle(cornerRadius: 10)
-            .fill(Color.black)
-            .frame(height: 2)
-        
     }
 }
 #endif
@@ -645,7 +648,7 @@ struct FooterView: View {
     @Binding var view: Int
     
     var body: some View {
-        HStack(spacing: 80) {
+        HStack(spacing: 40) {
             // Boton de batallas
 #if v2
             Button(action: {
@@ -654,7 +657,15 @@ struct FooterView: View {
                 Image("battles")
                     .resizable()
                     .frame(width: 61, height: 65)
+                    .offset(x:0, y:15)
             }
+            
+            //LINEA NEGRA SEPARADOR
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray)
+                .frame(width: 1, height: 70)
+                .offset(x:0, y:15)
+
 #endif
             // Boton de menu
             Button(action: {
@@ -663,7 +674,14 @@ struct FooterView: View {
                 Image("pokeball")
                     .resizable()
                     .frame(width: 61, height: 65)
+                    .offset(x:0, y:15)
             }
+            
+            //LINEA NEGRA SEPARADOR
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray)
+                .frame(width: 1, height: 70)
+                .offset(x:0, y:15)
             
             // Boton de perfil
             Button(action: {
@@ -672,6 +690,7 @@ struct FooterView: View {
                 Image("profile")
                     .resizable()
                     .frame(width: 61, height: 65)
+                    .offset(x:0, y:15)
             }
         }
         .frame(maxWidth: .infinity)
