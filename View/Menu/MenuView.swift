@@ -546,7 +546,7 @@ struct ProfileView: View {
         
     }
 }
-
+#if v2
 struct BattleFooterView: View {
     @Binding var pokemon_battle: [Pokemon]
     @State var rivalTeam: [Pokemon] = []
@@ -593,6 +593,7 @@ struct BattleFooterView: View {
                             Spacer()
                             
                             // `NavigationLink` para redirigir a la `BattleView`
+                            
                             NavigationLink(destination: BattleView(playerTeam: pokemon_battle, rivalTeam: rivalTeam)) {
                                 Image("start")
                                     .resizable()
@@ -620,8 +621,8 @@ struct BattleFooterView: View {
         .task {
             let randomPokemonNames = await ViewModel.instance.filterPokemons().shuffled().prefix(3)
             rivalTeam = await [ViewModel.instance.loadPokemon(name_id: randomPokemonNames[0]),
-                                   ViewModel.instance.loadPokemon(name_id: randomPokemonNames[1]),
-                                   ViewModel.instance.loadPokemon(name_id: randomPokemonNames[2])]
+                               ViewModel.instance.loadPokemon(name_id: randomPokemonNames[1]),
+                               ViewModel.instance.loadPokemon(name_id: randomPokemonNames[2])]
             for index in rivalTeam.indices {
                 let newMoves = await ViewModel.instance.loadMoves(pokemon_id: rivalTeam[index].id)
                 if !newMoves.isEmpty {
@@ -638,6 +639,7 @@ struct BattleFooterView: View {
         
     }
 }
+#endif
 
 struct FooterView: View {
     @Binding var view: Int
@@ -645,7 +647,7 @@ struct FooterView: View {
     var body: some View {
         HStack(spacing: 80) {
             // Boton de batallas
-            
+#if v2
             Button(action: {
                 view = 0
             }) {
@@ -653,7 +655,7 @@ struct FooterView: View {
                     .resizable()
                     .frame(width: 61, height: 65)
             }
-            
+#endif
             // Boton de menu
             Button(action: {
                 view = 1
@@ -721,10 +723,11 @@ struct MenuView: View {
                                     }
                             }
                         }
-                        
+                        #if v2
                         if view == 0 {
                             BattleFooterView(pokemon_battle: $pokemon_battle, pokemon_images: $pokemon_images, isContinuar: $isContinuar, pokemons: $pokemons, pokemon_names: $pokemon_names)
                         }
+                        #endif
                     } else {
                         ProfileView(view: $view)
                     }

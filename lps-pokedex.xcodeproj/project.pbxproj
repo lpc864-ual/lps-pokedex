@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3528A2D22D3722BE00B4BE68 /* LPSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A0BD412D30106C00BEB806 /* LPSApp.swift */; };
+		3528A2D52D3722BE00B4BE68 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35A0BD402D30106C00BEB806 /* Assets.xcassets */; };
 		35A0BD4E2D30106C00BEB806 /* LPSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35A0BD412D30106C00BEB806 /* LPSApp.swift */; };
 		35A0BD502D30106C00BEB806 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35A0BD402D30106C00BEB806 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -29,7 +31,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3585A1AA2D352086004B011A /* lps-pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lps-pokedex.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3528A2D92D3722BE00B4BE68 /* lps-pokedex v2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lps-pokedex v2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3585A1AA2D352086004B011A /* lps-pokedex v1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lps-pokedex v1.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3585A1AB2D352086004B011A /* lps-pokedexTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "lps-pokedexTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3585A1AC2D352086004B011A /* lps-pokedexUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "lps-pokedexUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		35A0BD402D30106C00BEB806 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -37,7 +40,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		35A0BD7C2D301B9000BEB806 /* Exceptions for "View" folder in "lps-pokedex" target */ = {
+		3528A2DC2D37243A00B4BE68 /* Exceptions for "View" folder in "lps-pokedex v2" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Authentication/SignInView.swift,
@@ -49,7 +52,20 @@
 				Pokemon/VistaEvolution.swift,
 				Pokemon/VistaMovimientos.swift,
 			);
-			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex */;
+			target = 3528A2D02D3722BE00B4BE68 /* lps-pokedex v2 */;
+		};
+		35A0BD7C2D301B9000BEB806 /* Exceptions for "View" folder in "lps-pokedex v1" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Authentication/SignInView.swift,
+				Authentication/SignUpView.swift,
+				Menu/MenuView.swift,
+				Pokemon/VistaAbout.swift,
+				Pokemon/VistaDetalle.swift,
+				Pokemon/VistaEvolution.swift,
+				Pokemon/VistaMovimientos.swift,
+			);
+			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex v1 */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -62,7 +78,8 @@
 		35A0BD6C2D301B9000BEB806 /* View */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				35A0BD7C2D301B9000BEB806 /* Exceptions for "View" folder in "lps-pokedex" target */,
+				35A0BD7C2D301B9000BEB806 /* Exceptions for "View" folder in "lps-pokedex v1" target */,
+				3528A2DC2D37243A00B4BE68 /* Exceptions for "View" folder in "lps-pokedex v2" target */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -70,6 +87,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3528A2D32D3722BE00B4BE68 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		35E2DA912CE3B5E3008A5986 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -101,18 +125,41 @@
 				35A0BD6C2D301B9000BEB806 /* View */,
 				35A0BD402D30106C00BEB806 /* Assets.xcassets */,
 				35A0BD412D30106C00BEB806 /* LPSApp.swift */,
-				3585A1AA2D352086004B011A /* lps-pokedex.app */,
+				3585A1AA2D352086004B011A /* lps-pokedex v1.app */,
 				3585A1AB2D352086004B011A /* lps-pokedexTests.xctest */,
 				3585A1AC2D352086004B011A /* lps-pokedexUITests.xctest */,
+				3528A2D92D3722BE00B4BE68 /* lps-pokedex v2.app */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		35E2DA932CE3B5E3008A5986 /* lps-pokedex */ = {
+		3528A2D02D3722BE00B4BE68 /* lps-pokedex v2 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 35E2DAB82CE3B5E5008A5986 /* Build configuration list for PBXNativeTarget "lps-pokedex" */;
+			buildConfigurationList = 3528A2D62D3722BE00B4BE68 /* Build configuration list for PBXNativeTarget "lps-pokedex v2" */;
+			buildPhases = (
+				3528A2D12D3722BE00B4BE68 /* Sources */,
+				3528A2D32D3722BE00B4BE68 /* Frameworks */,
+				3528A2D42D3722BE00B4BE68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				35A0BD592D301B9000BEB806 /* Model */,
+			);
+			name = "lps-pokedex v2";
+			packageProductDependencies = (
+			);
+			productName = LPS;
+			productReference = 3528A2D92D3722BE00B4BE68 /* lps-pokedex v2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		35E2DA932CE3B5E3008A5986 /* lps-pokedex v1 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 35E2DAB82CE3B5E5008A5986 /* Build configuration list for PBXNativeTarget "lps-pokedex v1" */;
 			buildPhases = (
 				35E2DA902CE3B5E3008A5986 /* Sources */,
 				35E2DA912CE3B5E3008A5986 /* Frameworks */,
@@ -125,11 +172,11 @@
 			fileSystemSynchronizedGroups = (
 				35A0BD592D301B9000BEB806 /* Model */,
 			);
-			name = "lps-pokedex";
+			name = "lps-pokedex v1";
 			packageProductDependencies = (
 			);
 			productName = LPS;
-			productReference = 3585A1AA2D352086004B011A /* lps-pokedex.app */;
+			productReference = 3585A1AA2D352086004B011A /* lps-pokedex v1.app */;
 			productType = "com.apple.product-type.application";
 		};
 		35E2DAA32CE3B5E5008A5986 /* lps-pokedexTests */ = {
@@ -211,14 +258,23 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				35E2DA932CE3B5E3008A5986 /* lps-pokedex */,
+				35E2DA932CE3B5E3008A5986 /* lps-pokedex v1 */,
 				35E2DAA32CE3B5E5008A5986 /* lps-pokedexTests */,
 				35E2DAAD2CE3B5E5008A5986 /* lps-pokedexUITests */,
+				3528A2D02D3722BE00B4BE68 /* lps-pokedex v2 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3528A2D42D3722BE00B4BE68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3528A2D52D3722BE00B4BE68 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		35E2DA922CE3B5E3008A5986 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -244,6 +300,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3528A2D12D3722BE00B4BE68 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3528A2D22D3722BE00B4BE68 /* LPSApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		35E2DA902CE3B5E3008A5986 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -271,17 +335,75 @@
 /* Begin PBXTargetDependency section */
 		35E2DAA62CE3B5E5008A5986 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex */;
+			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex v1 */;
 			targetProxy = 35E2DAA52CE3B5E5008A5986 /* PBXContainerItemProxy */;
 		};
 		35E2DAB02CE3B5E5008A5986 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex */;
+			target = 35E2DA932CE3B5E3008A5986 /* lps-pokedex v1 */;
 			targetProxy = 35E2DAAF2CE3B5E5008A5986 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		3528A2D72D3722BE00B4BE68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ual.LPS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = v2;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3528A2D82D3722BE00B4BE68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = ual.LPS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = v2;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		35E2DAB62CE3B5E5008A5986 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -423,6 +545,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ual.LPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = v1;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -451,6 +574,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ual.LPS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = v1;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -528,6 +652,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3528A2D62D3722BE00B4BE68 /* Build configuration list for PBXNativeTarget "lps-pokedex v2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3528A2D72D3722BE00B4BE68 /* Debug */,
+				3528A2D82D3722BE00B4BE68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		35E2DA8F2CE3B5E3008A5986 /* Build configuration list for PBXProject "lps-pokedex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -537,7 +670,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		35E2DAB82CE3B5E5008A5986 /* Build configuration list for PBXNativeTarget "lps-pokedex" */ = {
+		35E2DAB82CE3B5E5008A5986 /* Build configuration list for PBXNativeTarget "lps-pokedex v1" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				35E2DAB92CE3B5E5008A5986 /* Debug */,
